@@ -74,15 +74,14 @@ while(True):
 
                         [['แถม', 'ของ'], ['reply_bogof_1']],
                         [['1', 'แถม'], ['reply_bogof_1']],
-                        [['แถม'], ['reply_bogof_1']],
-                        [['แท้'], ['partner_genuine_1']],
-
-
 
                         [['sexy'], ['desc_sexy']],
                         [['เซ็กซี่'], ['desc_sexy']],
                         [['กลิ่นไหน','หอม'],['best_scent_sexy_1']],
                         [['ขายดี'],['best_seller_sexy_1','best_seller_sexy_2']],
+                        [['เที่ยว','กลางคืน'],['desc_sexy']]
+                        [['เที่ยว','ผับ'],['desc_sexy']]
+
                         [['ไป','เรียน'],['bonnie_scenario_1']],
                         [['ไป','ทำงาน'],['bonnie_scenario_1']],
                         [['ไป','มหาลัย'],['bonnie_scenario_1']],
@@ -91,7 +90,6 @@ while(True):
                         [['bonnie'], ['desc_bonnie']],
                         [['แป้ง'], ['desc_bonnie']],
 
-
                         [['sweetie'], ['desc_sweetie']],
                         [['picnic'], ['desc_sweetie']],
                         [['สวีตตี้'], ['desc_sweetie']],
@@ -99,6 +97,7 @@ while(True):
                         [['ปิค'], ['desc_sweetie']],
                         [['นิค'], ['desc_sweetie']],
                         [['นิก'], ['desc_sweetie']],
+                        [['หวาน'], ['desc_sweetie']],
 
                         [['blooming'], ['desc_blooming']],
                         [['boom'], ['desc_blooming']],
@@ -107,6 +106,8 @@ while(True):
 
                         [['wood'], ['desc_wood']],
                         [['วูด'], ['desc_wood']], 
+                        [['สดชื่น'], ['desc_wood']],
+                        [['ไม่หวาน'], ['desc_wood']],
 
                         [['กลิ่นใหม่'], ['desc_charming_sexy_martiny']],
                         [['ใช้ได้','นาน'], ['how_long_can_be_use_1','how_long_can_be_use_2','how_long_can_be_use_3']],
@@ -144,6 +145,8 @@ while(True):
                         [['ลืม','แจ้ง'],['forget_to_select_1','forget_to_select_2']],
 
                         [['ขนส่ง'],['shipping_1']],
+                        [['แถม'], ['reply_bogof_1']],
+                        [['แท้'], ['partner_genuine_1']],
                     ]
 
                     for search in search_array:
