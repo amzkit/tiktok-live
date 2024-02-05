@@ -1,4 +1,5 @@
 import sys
+import os
 
 unique_id = sys.argv[1]
 token = sys.argv[2]
@@ -47,7 +48,7 @@ async def on_comment(event: CommentEvent):
 
     filename = str(int(time.time())) + '_' + event.comment
     #filename = ''.join(e for e in filename if e.isalnum())
-    tts.save('comment\\'+filename+'.ogg')
+    tts.save(os.path.join('comment', filename +'.ogg')
 
 @client.on("disconnect")
 async def on_disconnect(event: DisconnectEvent):
