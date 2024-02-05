@@ -5,7 +5,6 @@ clips = os.listdir('loop')
 
 import pygame
 import random
-from pathlib import Path
 
 #Line Notify
 import requests
@@ -14,14 +13,15 @@ token = 'AQaMH3QBpt26fMtJajb0FAusthjXwAhZ7eMcDGZuriT'
 headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+token}
 main_volume = 0.05
 
-reply_path = Path('reply/')
-comment_path = Path('comment/')
-music_path = Path('music/')
-loop_path = Path('loop/')
+reply_path = 'reply'
+comment_path = 'comment'
+music_path = 'music'
+loop_path = 'loop'
 
+sound_ext = '.ogg'
 #play blackground music
 pygame.mixer.init()
-pygame.mixer.music.load(music_path / 'kpop.mp3')
+pygame.mixer.music.load(os.path.join(music_path, 'kpop'+sound_ext))
 pygame.mixer.music.set_volume(0.03)
 pygame.mixer.music.play(loops=-1)
 
@@ -30,8 +30,8 @@ while(True):
 
 
     #main loop
-    main = pygame.mixer.Sound(loop_path / clips[i])
-    print('['+time.strftime('%H:%M')+'][Main] : playing ' + clips[i] + ' | Duration : ', main.get_length())
+    main = pygame.mixer.Sound(os.path.join(loop_path, clips[i]))
+    print('['+time.strftime('%H:%M')+'][Main] : playing ' + clips[i] + ' | Duration :', int(main.get_length()), 'secs')
     pygame.mixer.Channel(0).queue(main)
     main.set_volume(main_volume)
     #main.play()
@@ -39,7 +39,7 @@ while(True):
 
     while pygame.mixer.get_busy():
         # Comment Found
-        speech_queue = os.listdir('comment')
+        speech_queue = os.listdir(comment_path)
         if len(speech_queue) > 0:
             time.sleep(0.5)
             # if there is speech, pause main loop
@@ -48,9 +48,9 @@ while(True):
                     pygame.mixer.Channel(0).pause()
                     reply_file = ''
 
-                    q = pygame.mixer.Sound(comment_path / speech)
+                    q = pygame.mixer.Sound(os.path.join(comment_path, speech))
                     
-                    print('['+time.strftime('%H:%M')+'][Speech] : play ' + speech + ' | Duration : ', q.get_length())
+                    print('['+time.strftime('%H:%M')+'][Speech] : play ' + speech + ' | Duration :', int(q.get_length()), 'secs')
                     pygame.mixer.Channel(1).play(q)
                     #q = pygame.mixer.Sound('comment\\'+speech)
                     #pygame.mixer.pause()
@@ -65,85 +65,85 @@ while(True):
                     search_array = [
     #   [['keyword1','keyword2', 'keyword3'], ['filename_1', 'filename_2']],
     #   keyword1 and keyword2 and keyword 3 => reply with filename_1 or filename_2 randomly
-                        [['ผช','แถม','กลิ่น'], ['can_be_mixed_1.mp3','can_be_mixed_2.mp3']],
+                        [['ผช','แถม','กลิ่น'], ['can_be_mixed_1','can_be_mixed_2']],
 
-                        [['คละ','กลิ่น'], ['can_be_mixed_1.mp3','can_be_mixed_2.mp3']],
+                        [['คละ','กลิ่น'], ['can_be_mixed_1','can_be_mixed_2']],
 
-                        [['แถม', 'สี'], ['what_scent_of_free_gift_1.mp3']],
-                        [['เทส', 'สี'], ['what_scent_of_free_gift_1.mp3']],
+                        [['แถม', 'สี'], ['what_scent_of_free_gift_1']],
+                        [['เทส', 'สี'], ['what_scent_of_free_gift_1']],
 
-                        [['แถม', 'ของ'], ['reply_bogof_1.mp3']],
-                        [['1', 'แถม'], ['reply_bogof_1.mp3']],
-                        [['แถม'], ['reply_bogof_1.mp3']],
-                        [['แท้'], ['partner_genuine_1.mp3']],
-
-
-
-                        [['sexy'], ['desc_sexy.mp3']],
-                        [['เซ็กซี่'], ['desc_sexy.mp3']],
-                        [['กลิ่นไหน','หอม'],['best_scent_sexy_1.mp3']],
-                        [['ขายดี'],['best_seller_sexy_1.mp3','best_seller_sexy_2.mp3']],
-                        [['ไป','เรียน'],['bonnie_scenario_1.mp3']],
-                        [['ไป','ทำงาน'],['bonnie_scenario_1.mp3']],
-                        [['ไป','มหาลัย'],['bonnie_scenario_1.mp3']],
-                        [['ไป','ออฟฟิต'],['bonnie_scenario_1.mp3']],
-                        [['บอนนี่'], ['desc_bonnie.mp3']],
-                        [['bonnie'], ['desc_bonnie.mp3']],
-                        [['แป้ง'], ['desc_bonnie.mp3']],
+                        [['แถม', 'ของ'], ['reply_bogof_1']],
+                        [['1', 'แถม'], ['reply_bogof_1']],
+                        [['แถม'], ['reply_bogof_1']],
+                        [['แท้'], ['partner_genuine_1']],
 
 
-                        [['sweetie'], ['desc_sweetie.mp3']],
-                        [['picnic'], ['desc_sweetie.mp3']],
-                        [['สวีตตี้'], ['desc_sweetie.mp3']],
-                        [['ปิก'], ['desc_sweetie.mp3']],
-                        [['ปิค'], ['desc_sweetie.mp3']],
-                        [['นิค'], ['desc_sweetie.mp3']],
-                        [['นิก'], ['desc_sweetie.mp3']],
 
-                        [['blooming'], ['desc_blooming.mp3']],
-                        [['boom'], ['desc_blooming.mp3']],
-                        [['บูม'], ['desc_blooming.mp3']],
-                        [['บลูมมิ่ง'], ['desc_blooming.mp3']],
-
-                        [['wood'], ['desc_wood.mp3']],
-                        [['วูด'], ['desc_wood.mp3']], 
-
-                        [['กลิ่นใหม่'], ['desc_charming_sexy_martiny.mp3']],
-                        [['ใช้ได้','นาน'], ['how_long_can_be_use_1.mp3','how_long_can_be_use_2.mp3','how_long_can_be_use_3.mp3']],
+                        [['sexy'], ['desc_sexy']],
+                        [['เซ็กซี่'], ['desc_sexy']],
+                        [['กลิ่นไหน','หอม'],['best_scent_sexy_1']],
+                        [['ขายดี'],['best_seller_sexy_1','best_seller_sexy_2']],
+                        [['ไป','เรียน'],['bonnie_scenario_1']],
+                        [['ไป','ทำงาน'],['bonnie_scenario_1']],
+                        [['ไป','มหาลัย'],['bonnie_scenario_1']],
+                        [['ไป','ออฟฟิต'],['bonnie_scenario_1']],
+                        [['บอนนี่'], ['desc_bonnie']],
+                        [['bonnie'], ['desc_bonnie']],
+                        [['แป้ง'], ['desc_bonnie']],
 
 
-                        [['ml'], ['how_many_ml_1.mp3','how_many_ml_2.mp3','how_many_ml_3.mp3']],
-                        [['คละ','กลิ่น'], ['can_be_mixed_1.mp3','can_be_mixed_2.mp3']],
+                        [['sweetie'], ['desc_sweetie']],
+                        [['picnic'], ['desc_sweetie']],
+                        [['สวีตตี้'], ['desc_sweetie']],
+                        [['ปิก'], ['desc_sweetie']],
+                        [['ปิค'], ['desc_sweetie']],
+                        [['นิค'], ['desc_sweetie']],
+                        [['นิก'], ['desc_sweetie']],
 
-                        [['สั่ง','แล้ว'],['ordered_1.mp3','ordered_1.mp3','ordered_2.mp3']],
-                        [['สั่ง','ละ'],['ordered_1.mp3','ordered_1.mp3','ordered_2.mp3']],
-                        [['สั่ง','ไป'],['ordered_1.mp3','ordered_1.mp3','ordered_2.mp3']],
+                        [['blooming'], ['desc_blooming']],
+                        [['boom'], ['desc_blooming']],
+                        [['บูม'], ['desc_blooming']],
+                        [['บลูมมิ่ง'], ['desc_blooming']],
 
-                        [['ส่ง','วัน'],['how_many_days_1.mp3','how_many_days_2.mp3']],
-                        [['ส่ง','ของ'],['how_many_days_1.mp3','how_many_days_2.mp3']],
+                        [['wood'], ['desc_wood']],
+                        [['วูด'], ['desc_wood']], 
 
-                        [['ติด','ทน'],['how_long_it_stays_1.mp3','how_long_it_stays_2.mp3','how_long_it_stays_3.mp3']],
-                        [['ติด','นาน'],['how_long_it_stays_1.mp3','how_long_it_stays_2.mp3','how_long_it_stays_3.mp3']],
+                        [['กลิ่นใหม่'], ['desc_charming_sexy_martiny']],
+                        [['ใช้ได้','นาน'], ['how_long_can_be_use_1','how_long_can_be_use_2','how_long_can_be_use_3']],
 
-                        [['unisex'], ['unisex_1.mp3','unisex_1.mp3','unisex_2.mp3']],
-                        [['ผช','ผญ'], ['unisex_1.mp3','unisex_1.mp3','unisex_2.mp3']],
-                        [['ชาย','หญิง'], ['unisex_1.mp3','unisex_1.mp3','unisex_2.mp3']],
-                        [['ผช','หญิง'], ['unisex_1.mp3','unisex_1.mp3','unisex_2.mp3']],
-                        [['ชาย','ผญ'], ['unisex_1.mp3','unisex_1.mp3','unisex_2.mp3']],
 
-                        [['ผช'], ['desc_men.mp3']],
-                        [['ผู้ชาย'], ['desc_men.mp3']],
+                        [['ml'], ['how_many_ml_1','how_many_ml_2','how_many_ml_3']],
+                        [['คละ','กลิ่น'], ['can_be_mixed_1','can_be_mixed_2']],
 
-                        [['ไม่ฉุน'],['non_stink.mp3']],
-                        [['กลิ่น','อ่อน'],['gentle_smell_bonnie_sweetie_1.mp3','gentle_smell_bonnie_sweetie_2.mp3']],
-                        [['ตะกร้า'],['basket_123_1.mp3']],
+                        [['สั่ง','แล้ว'],['ordered_1','ordered_1','ordered_2']],
+                        [['สั่ง','ละ'],['ordered_1','ordered_1','ordered_2']],
+                        [['สั่ง','ไป'],['ordered_1','ordered_1','ordered_2']],
 
-                        [['ไม่','ระบุ'],['forget_to_select_1.mp3','forget_to_select_2.mp3']],
-                        [['ลืม','ระบุ'],['forget_to_select_1.mp3','forget_to_select_2.mp3']],
-                        [['ไม่','แจ้ง'],['forget_to_select_1.mp3','forget_to_select_2.mp3']],
-                        [['ลืม','แจ้ง'],['forget_to_select_1.mp3','forget_to_select_2.mp3']],
+                        [['ส่ง','วัน'],['how_many_days_1','how_many_days_2']],
+                        [['ส่ง','ของ'],['how_many_days_1','how_many_days_2']],
 
-                        [['ขนส่ง'],['shipping_1.mp3']],
+                        [['ติด','ทน'],['how_long_it_stays_1','how_long_it_stays_2','how_long_it_stays_3']],
+                        [['ติด','นาน'],['how_long_it_stays_1','how_long_it_stays_2','how_long_it_stays_3']],
+
+                        [['unisex'], ['unisex_1','unisex_1','unisex_2']],
+                        [['ผช','ผญ'], ['unisex_1','unisex_1','unisex_2']],
+                        [['ชาย','หญิง'], ['unisex_1','unisex_1','unisex_2']],
+                        [['ผช','หญิง'], ['unisex_1','unisex_1','unisex_2']],
+                        [['ชาย','ผญ'], ['unisex_1','unisex_1','unisex_2']],
+
+                        [['ผช'], ['desc_men']],
+                        [['ผู้ชาย'], ['desc_men']],
+
+                        [['ไม่ฉุน'],['non_stink']],
+                        [['กลิ่น','อ่อน'],['gentle_smell_bonnie_sweetie_1','gentle_smell_bonnie_sweetie_2']],
+                        [['ตะกร้า'],['basket_123_1']],
+
+                        [['ไม่','ระบุ'],['forget_to_select_1','forget_to_select_2']],
+                        [['ลืม','ระบุ'],['forget_to_select_1','forget_to_select_2']],
+                        [['ไม่','แจ้ง'],['forget_to_select_1','forget_to_select_2']],
+                        [['ลืม','แจ้ง'],['forget_to_select_1','forget_to_select_2']],
+
+                        [['ขนส่ง'],['shipping_1']],
                     ]
 
                     for search in search_array:
@@ -157,10 +157,11 @@ while(True):
                             break
 
                     if(reply_file != ''):
-                        reply = pygame.mixer.Sound(reply_path / reply_file)
+                        print('['+time.strftime('%H:%M')+'][Reply] : play ' + reply_file + ' | Duration :', int(reply.get_length()), 'secs')
+                        r = requests.post(url, headers=headers, data = {'message': 'ตอบกลับ ' + reply_file})
+                        reply_file = reply_file + sound_ext
+                        reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
                         reply.set_volume(main_volume)
-                        print('['+time.strftime('%H:%M')+'][Reply] : play ' + reply_file + ' | Duration : ', reply.get_length())
-                        r = requests.post(url, headers=headers, data = {'message':'ตอบกลับ ' + reply_file})
                         pygame.mixer.Channel(1).play(reply)
                         
                         while pygame.mixer.Channel(1).get_busy():
@@ -170,7 +171,7 @@ while(True):
                     print('['+time.strftime('%H:%M')+'][Main] : continue ' + clips[i])
                     pygame.mixer.Channel(0).unpause()
 
-                    os.remove('comment\\'+speech)
+                    os.remove(os.path.join(comment_path, speech))
                 except FileNotFoundError:
                     print(FileNotFoundError)
         time.sleep(2)
@@ -179,7 +180,7 @@ while(True):
     i = (i + 1) % len(clips)
 
 
-#mixer.music.load("speech.mp3")
+#mixer.music.load("speech")
 #mixer.music.play()
 
 

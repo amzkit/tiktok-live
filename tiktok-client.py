@@ -47,7 +47,7 @@ async def on_comment(event: CommentEvent):
 
     filename = str(int(time.time())) + '_' + event.comment
     #filename = ''.join(e for e in filename if e.isalnum())
-    tts.save('comment\\'+filename+'.mp3')
+    tts.save('comment\\'+filename+'.ogg')
 
 @client.on("disconnect")
 async def on_disconnect(event: DisconnectEvent):
