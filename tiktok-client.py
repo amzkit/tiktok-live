@@ -28,6 +28,7 @@ def notify(message):
     r = requests.post(url, headers=headers, data = {'message':message})
 
 def notify_in_seconds(message, waiting_seconds):
+    waiting_seconds = int(waiting_seconds)
     if waiting_seconds > 0:
         # sleep exactly the right amount of time
         m, s = divmod(waiting_seconds, 60)
@@ -127,7 +128,7 @@ if __name__ == '__main__':
         print('['+time.strftime('%H:%M')+']['+unique_id+'] ERROR:', e)
 
         if hasattr(e, 'retry_after'):
-            waiting_seconds = e.retry_after
-            print('Sleep for', waiting_seconds, 'seconds')
-            time.sleep(int(waiting_seconds))
+            wait = e.retry_after
+            print('Sleep for', wait, 'seconds')
+            time.sleep(int(wait))
 

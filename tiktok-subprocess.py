@@ -17,7 +17,7 @@ threads_sleep_time = []
 
 for temp in accounts:
     threads.append([])
-    threads_sleep_time.append(1)
+    threads_sleep_time.append(4)
 
 while True:
     for i in range(len(accounts)):
@@ -29,12 +29,12 @@ while True:
 
             time.sleep(threads_sleep_time[i])
             threads_sleep_time[i] = threads_sleep_time[i] * 2
-            if(threads_sleep_time[i] > 600):
-                threads_sleep_time[i] = 600
+            if(threads_sleep_time[i] > 900):
+                threads_sleep_time[i] = 900
 
         elif type(threads[i]) == threading.Thread:
             if not threads[i].is_alive():
                 threads[i] = []
-    time.sleep(2)
+    time.sleep(3)
     #process = subprocess.run(['python', 'tiktok-client.py', account[0], account[1]])
 
