@@ -28,13 +28,13 @@ def notify(message):
     r = requests.post(url, headers=headers, data = {'message':message})
 
 def notify_in_seconds(message, waiting_seconds):
-    waiting_seconds = int(waiting_seconds)
-    if waiting_seconds > 0:
+    #waiting_seconds = int(waiting_seconds)
+    if int(waiting_seconds) > 0:
         # sleep exactly the right amount of time
-        m, s = divmod(waiting_seconds, 60)
+        m, s = divmod(int(waiting_seconds), 60)
         h, m = divmod(m, 60)
         print('['+time.strftime('%H:%M')+']['+unique_id+'] notify in', f'{h:02d}:{m:02d}', 'hours')
-        time.sleep(waiting_seconds)
+        time.sleep(int(waiting_seconds))
         notify(message)
 
 @client.on("connect")
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     # await client.start() to run non-blocking
     try:
         client.run()
-        
+
     except Exception as e:
         print('['+time.strftime('%H:%M')+']['+unique_id+'] ERROR:', e)
 
