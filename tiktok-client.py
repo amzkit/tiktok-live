@@ -124,6 +124,7 @@ if __name__ == '__main__':
     # await client.start() to run non-blocking
     try:
         client.run()
+        
     except Exception as e:
         print('['+time.strftime('%H:%M')+']['+unique_id+'] ERROR:', e)
 
