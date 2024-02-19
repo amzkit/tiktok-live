@@ -15,6 +15,7 @@ main_volume = 0.05
 
 reply_path = 'reply'
 comment_path = 'comment'
+comment_error_path = 'error'
 music_path = 'music'
 loop_path = 'loop'
 
@@ -93,6 +94,7 @@ while(True):
                         [['sweetie'], ['desc_sweetie']],
                         [['picnic'], ['desc_sweetie']],
                         [['สวีตตี้'], ['desc_sweetie']],
+                        [['สวีทตี้'], ['desc_sweetie']],
                         [['ปิก'], ['desc_sweetie']],
                         [['ปิค'], ['desc_sweetie']],
                         [['นิค'], ['desc_sweetie']],
@@ -135,7 +137,7 @@ while(True):
                         [['ผช'], ['desc_men']],
                         [['ผู้ชาย'], ['desc_men']],
 
-                        [['ไม่ฉุน'],['non_stink']],
+                        [['ไม่ฉุน'],['non_stink_1']],
                         [['กลิ่น','อ่อน'],['gentle_smell_bonnie_sweetie_1','gentle_smell_bonnie_sweetie_2']],
                         [['ตะกร้า'],['basket_123_1']],
 
@@ -160,10 +162,10 @@ while(True):
                             break
 
                     if(reply_file != ''):
-                        print('['+time.strftime('%H:%M')+'][Reply] : play ' + reply_file + ' | Duration :', int(reply.get_length()), 'secs')
                         r = requests.post(url, headers=headers, data = {'message': 'ตอบกลับ ' + reply_file})
                         reply_file = reply_file + sound_ext
                         reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
+                        print('['+time.strftime('%H:%M')+'][Reply] : play ' + reply_file + ' | Duration :', int(reply.get_length()), 'secs')
                         reply.set_volume(main_volume)
                         pygame.mixer.Channel(1).play(reply)
                         
@@ -176,7 +178,8 @@ while(True):
 
                     os.remove(os.path.join(comment_path, speech))
                 except FileNotFoundError:
-                    print(FileNotFoundError)
+                    print("FileNotFoundError:", os.path.join(comment_path, speech))
+                    os.rename(os.path.join(comment_path, speech), os.path.join(comment_error_path, speech))
         time.sleep(2)
 
     # play next clip

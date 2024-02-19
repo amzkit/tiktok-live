@@ -4,7 +4,7 @@ import time
 accounts = [
     ['@janua_official', 'CPF3M1CLAuEGUxHP2S5WnmjdeeDiZtcwyLxhb5stCsW'],
     ['@prw.xx', 'PNTRtn2tZDnz6zI3mVRC4o7xthxogTVwDmo21HI2r07'],
-#    ['@itsskin_byprw','zNaqvEdjUqsiHoRtHNegEh1XLIV6e4NPAtyeGwuwd3a'],
+    ['@itsskin_byprw','zNaqvEdjUqsiHoRtHNegEh1XLIV6e4NPAtyeGwuwd3a'],
     ['@perfumexlab', 'QRmlgL6hLf5oBBWxHrEJ9RtndZQMpOcppePlzWF069H']
 ]
 

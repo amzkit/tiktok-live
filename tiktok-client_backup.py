@@ -1,13 +1,10 @@
 import sys
 import os
-import threading
-
-unique_id = sys.argv[1]
-token = sys.argv[2]
-
-#test id & token
+import schedule
+#unique_id = sys.argv[1]
+#token = sys.argv[2]
 #unique_id = '@perfumexlab'
-#token = 'NIcr2QFJ1eJCfuELDLZQzJpYF5E3mdt8x3Baho2qRGu'
+#token = 'QRmlgL6hLf5oBBWxHrEJ9RtndZQMpOcppePlzWF069H'
 
 # TiktokLiveClient
 from TikTokLive import TikTokLiveClient
@@ -16,44 +13,39 @@ from TikTokLive.types.events import CommentEvent, ConnectEvent, DisconnectEvent,
 #GTTS Speech
 from gtts import gTTS
 import time
-
+import datetime
 #Line Notify
 import requests
 url = 'https://notify-api.line.me/api/notify'
-headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+token}
+#token = 'NIcr2QFJ1eJCfuELDLZQzJpYF5E3mdt8x3Baho2qRGu' Test
+#headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+token}
+
+
+room_create_time = -1
+#Tiktok Account
+unique_id = "@perfumexlab"
 
 client: TikTokLiveClient = TikTokLiveClient(unique_id)
 
-def notify(message):
-    r = requests.post(url, headers=headers, data = {'message':message})
+def notify():
+    print('')
 
-def notify_in_seconds(message, waiting_seconds):
-    if waiting_seconds > 0:
-        # sleep exactly the right amount of time
-        m, s = divmod(waiting_seconds, 60)
-        h, m = divmod(m, 60)
-        print('['+time.strftime('%H:%M')+']['+unique_id+'] notify in', f'{h:02d}:{m:02d}', 'hours')
-        time.sleep(waiting_seconds)
-        notify(message)
 
 @client.on("connect")
 async def on_connect(_: ConnectEvent):
+    #print(client.room_info['create_time'])
     create_time_epoch = client.room_info['create_time']
-    create_time_str = time.strftime('%H:%M', time.localtime(create_time_epoch))
-    ending_time_epoch = create_time_epoch + 14400
-    ending_time_str = time.strftime('%H:%M', time.localtime(ending_time_epoch))
+    
+    t = time.ctime(create_time_epoch)
 
-    time_now = int(time.time())
-    waiting_seconds = 14400 - 300 - (time_now - create_time_epoch)
-
-    print('['+time.strftime('%H:%M')+']['+unique_id+'] [Start] ' + create_time_str + ' [End] ' + ending_time_str)#, room_create_time)
+    room_create_time = time.strftime('%H:%M:%S', t)
+    print("room_create_time", room_create_time)
+    print('['+time.strftime('%H:%M')+']['+unique_id+'] '+ "is on live")#, room_create_time)
     #message = unique_id + 'is on live'# + room_create_time
-    message = unique_id + ' ' + create_time_str + ' - ' + ending_time_str
-    notify(message)
+    message = unique_id + ' on air | started at ' + room_create_time
+    print(message)
 
-    notify_message = unique_id + ' is ending around ' + ending_time_str
-    thread = threading.Thread(target=notify_in_seconds, args={notify_message, waiting_seconds})
-    thread.start()
+    #r = requests.post(url, headers=headers, data = {'message':message})
     #tts = gTTS("สวัสดีค่า", lang='th')
     #filename = str(int(time.time()))
     #tts.save('comment\\'+filename+'.mp3')
@@ -72,8 +64,7 @@ async def on_comment(event: CommentEvent):
 @client.on("disconnect")
 async def on_disconnect(event: DisconnectEvent):
     print('['+time.strftime('%H:%M')+']['+unique_id+'] Disconnected')
-    message = unique_id + ' disconnected'
-    notify(message)
+    #r = requests.post(url, headers=headers, data = {'message': unique_id + ' disconnected'})
 
     #print("Disconnected")
 
@@ -125,9 +116,4 @@ if __name__ == '__main__':
         client.run()
     except Exception as e:
         print('['+time.strftime('%H:%M')+']['+unique_id+'] ERROR:', e)
-
-        if hasattr(e, 'retry_after'):
-            waiting_seconds = e.retry_after
-            print('Sleep for', waiting_seconds, 'seconds')
-            time.sleep(int(waiting_seconds))
 
