@@ -27,37 +27,51 @@ client: TikTokLiveClient = TikTokLiveClient(unique_id)
 def notify(message):
     r = requests.post(url, headers=headers, data = {'message':message})
 
-def notify_in_seconds(message, waiting_seconds):
-    #waiting_seconds = int(waiting_seconds)
-    if int(waiting_seconds) > 0:
+def notify_before_end(time_diff):
+    #number of second to be waited until end - 300 (before 5 mins)
+    waiting_seconds = 14400 - (time_diff % 14400) - 300
+    if waiting_seconds > 0:
         # sleep exactly the right amount of time
-        m, s = divmod(int(waiting_seconds), 60)
+        m, s = divmod(waiting_seconds, 60)
         h, m = divmod(m, 60)
-        print('['+time.strftime('%H:%M')+']['+unique_id+'] notify in', f'{h:02d}:{m:02d}', 'hours')
-        time.sleep(int(waiting_seconds))
+        print('['+time.strftime('%H:%M')+']['+unique_id+'] set notification in', f'{h:02d}:{m:02d}', 'hours')
+        time.sleep(waiting_seconds)
+        message = unique_id + ' is ending in 5 mins'
         notify(message)
 
 @client.on("connect")
 async def on_connect(_: ConnectEvent):
+    time_now = int(time.time())
     create_time_epoch = client.room_info['create_time']
     create_time_str = time.strftime('%H:%M', time.localtime(create_time_epoch))
-    ending_time_epoch = create_time_epoch + 14400
+
+    #check how many seconds have been passed since room created
+    time_diff = time_now - create_time_epoch
+
+    #check how many round for each 4hours passes
+    round_count = int(time_diff / 14400)
+
+    #find ending time (each 4 hours since created)
+    ending_time_epoch = create_time_epoch + 14400*(round_count+1)
     ending_time_str = time.strftime('%H:%M', time.localtime(ending_time_epoch))
 
-    time_now = int(time.time())
-    waiting_seconds = 14400 - 300 - (time_now - create_time_epoch)
-
     print('['+time.strftime('%H:%M')+']['+unique_id+'] [Start] ' + create_time_str + ' [End] ' + ending_time_str)#, room_create_time)
-    #message = unique_id + 'is on live'# + room_create_time
     message = unique_id + ' ' + create_time_str + ' - ' + ending_time_str
     notify(message)
 
-    notify_message = unique_id + ' is ending around ' + ending_time_str
-    thread = threading.Thread(target=notify_in_seconds, args={notify_message, waiting_seconds})
+    #############################################
+    #print('Now               :', time_now )
+    #print('Create Time       :', create_time_epoch)
+    #print('Ending Time       :', ending_time_epoch)
+    #m, s = divmod(time_diff, 60)
+    #h, m = divmod(m, 60)
+    #print('Time Diff         :', time_diff,f'{h:02d}:{m:02d}')
+    #print('Round count       :', round_count)
+    ##############################################
+
+    # Set time to notify
+    thread = threading.Thread(target=notify_before_end, args={time_diff:time_diff})
     thread.start()
-    #tts = gTTS("สวัสดีค่า", lang='th')
-    #filename = str(int(time.time()))
-    #tts.save('comment\\'+filename+'.mp3')
 
 # Notice no decorator?
 async def on_comment(event: CommentEvent):
