@@ -77,6 +77,7 @@ async def on_connect(_: ConnectEvent):
 async def on_comment(event: CommentEvent):
     print('['+time.strftime('%H:%M')+']['+unique_id+'] '+ event.user.nickname + ' : ' + event.comment)
     message = event.user.nickname + ' : ' + event.comment
+    notify(message)
     #r = requests.post(url, headers=headers, data = {'message':message})
     tts = gTTS(event.comment, lang='th')
 
