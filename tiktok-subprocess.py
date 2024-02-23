@@ -23,7 +23,7 @@ while True:
     for i in range(len(accounts)):
         if threads[i] == []:
             time.sleep(threads_sleep_time[i])
-            print('['+time.strftime('%H:%M')+'][' + accounts[i][0] + '] Attempt to connect | waiting time = ' + str(threads_sleep_time[i]))
+            print('['+time.strftime('%H:%M')+'][A][' + accounts[i][0] + '] Attempt to connect | waiting time = ' + str(threads_sleep_time[i]))
             threads[i] = threading.Thread(target=callback, args=accounts[i])
             threads[i].start()
             #print('[xxx]', type(threads[i]))

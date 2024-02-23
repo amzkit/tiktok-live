@@ -82,6 +82,8 @@ while(True):
                         [['ขายดี'],['best_seller_sexy_1','best_seller_sexy_2']],
                         [['เที่ยว','กลางคืน'],['desc_sexy']],
                         [['เที่ยว','ผับ'],['desc_sexy']],
+                        [['ซซ'],['desc_sexy']],
+
 
                         [['ไป','เรียน'],['bonnie_scenario_1']],
                         [['ไป','ทำงาน'],['bonnie_scenario_1']],

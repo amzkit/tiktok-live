@@ -34,7 +34,7 @@ def notify_before_end(time_diff):
         # sleep exactly the right amount of time
         m, s = divmod(waiting_seconds, 60)
         h, m = divmod(m, 60)
-        print('['+time.strftime('%H:%M')+']['+unique_id+'] set notification in', f'{h:02d}:{m:02d}', 'hours')
+        #print('['+time.strftime('%H:%M')+']['+unique_id+'] set notification in', f'{h:02d}:{m:02d}', 'hours')
         time.sleep(waiting_seconds)
         message = unique_id + ' is ending in 5 mins'
         notify(message)
@@ -55,7 +55,7 @@ async def on_connect(_: ConnectEvent):
     ending_time_epoch = create_time_epoch + 14400*(round_count+1)
     ending_time_str = time.strftime('%H:%M', time.localtime(ending_time_epoch))
 
-    print('['+time.strftime('%H:%M')+']['+unique_id+'] [Start] ' + create_time_str + ' [End] ' + ending_time_str)#, room_create_time)
+    print('['+time.strftime('%H:%M')+'][C]['+unique_id+'] [Start] ' + create_time_str + ' [End] ' + ending_time_str)#, room_create_time)
     message = unique_id + ' ' + create_time_str + ' - ' + ending_time_str
     notify(message)
 
