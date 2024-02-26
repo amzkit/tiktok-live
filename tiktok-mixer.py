@@ -178,6 +178,7 @@ while(True):
                     print("FileNotFoundError:", os.path.join(comment_path, speech))
                     if os.path.exists(os.path.join(comment_path, speech)):
                         os.rename(os.path.join(comment_path, speech), os.path.join(comment_error_path, speech))
+                    time.sleep(1)
                     
         time.sleep(2)
 
