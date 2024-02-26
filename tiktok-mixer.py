@@ -175,11 +175,16 @@ while(True):
 
                     os.remove(os.path.join(comment_path, speech))
                 except FileNotFoundError:
-                    print("FileNotFoundError:", os.path.join(comment_path, speech))
-                    if os.path.exists(os.path.join(comment_path, speech)):
-                        os.rename(os.path.join(comment_path, speech), os.path.join(comment_error_path, speech))
                     time.sleep(1)
-                    
+                    try:
+                        print("FileNotFoundError:", os.path.join(comment_path, speech))
+                        if os.path.exists(os.path.join(comment_path, speech)):
+                            os.rename(os.path.join(comment_path, speech), os.path.join(comment_error_path, speech))
+                    except:
+                        time.sleep(1)
+                        print("Error: cannot move a file", os.path.join(comment_path, speech))
+                        r = requests.post(url, headers=headers, data = {'message': 'Error: ' + reply_file})
+
         time.sleep(2)
 
     # play next clip
