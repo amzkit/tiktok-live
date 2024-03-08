@@ -8,23 +8,37 @@ import random
 
 #Line Notify
 import requests
+
+
 url = 'https://notify-api.line.me/api/notify'
 token = 'AQaMH3QBpt26fMtJajb0FAusthjXwAhZ7eMcDGZuriT'
 headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+token}
-main_volume = 0.05
+#main_volume = 0.05
 
 reply_path = 'reply'
 comment_path = 'comment'
 comment_error_path = 'error'
-music_path = 'music'
+
 loop_path = 'loop'
 
 sound_ext = '.ogg'
+
+
 #play blackground music
+import subprocess
+import threading
+
+def callback():
+    process = subprocess.run(['python', 'play-background-music.py'])
+
+thread = threading.Thread(target=callback)
+thread.start()
+
+#main loop
 pygame.mixer.init()
-pygame.mixer.music.load(os.path.join(music_path, 'kpop'+sound_ext))
-pygame.mixer.music.set_volume(0.03)
-pygame.mixer.music.play(loops=-1)
+#pygame.mixer.music.load(os.path.join(music_path, 'kpop'+sound_ext))
+#pygame.mixer.music.set_volume(0.03)
+#pygame.mixer.music.play(loops=-1)
 
 search_array = [
 #   [['keyword1','keyword2', 'keyword3'], ['filename_1', 'filename_2']],
@@ -33,19 +47,20 @@ search_array = [
 
     [['คละ','กลิ่น'], ['can_be_mixed_1','can_be_mixed_2']],
 
-    [['แถม', 'สี'], ['what_scent_of_free_gift_1']],
-    [['เทส', 'สี'], ['what_scent_of_free_gift_1']],
+    [['แถม', 'สี'], ['แถมสี_สีสติ๊กเกอร์']],
+    [['เทส', 'สี'], ['แถมสี_สีสติ๊กเกอร์']],
 
-    [['แถม', 'ของ'], ['reply_bogof_1']],
-    [['1', 'แถม'], ['reply_bogof_1']],
+    [['แถม', 'ของ'], ['แถม_1แถม1ตะกร้าที่1เท่านั้น']],
+    [['1', 'แถม'], ['แถม_1แถม1ตะกร้าที่1เท่านั้น']],
 
-    [['sexy'], ['desc_sexy']],
-    [['เซ็กซี่'], ['desc_sexy']],
-    [['เที่ยว','กลางคืน'],['desc_sexy']],
-    [['เที่ยว','ผับ'],['desc_sexy']],
-    [['ซซ'],['desc_sexy']],
-    [['ขายดี'],['best_seller_sexy_1','best_seller_sexy_2']],
-    [['กลิ่นไหน','หอม'],['best_scent_sexy_1']],
+    [['sexy'], ['ซซ_รีวิวเซกซี่']],
+    [['เซ็กซี่'], ['ซซ_รีวิวเซกซี่']],
+    [['เที่ยว','กลางคืน'],['ซซ_รีวิวเซกซี่']],
+    [['เที่ยว','ผับ'],['ซซ_รีวิวเซกซี่']],
+    [['ซซ'],['ซซ_รีวิวเซกซี่']],
+
+    [['ขายดี'],['ขายดี_บลูมมิ่ง_เซกซี่']],
+    [['กลิ่นไหน','หอม'],['ขายดี_บลูมมิ่ง_เซกซี่']],
 
     [['ไป','เรียน'],['bonnie_scenario_1']],
     [['ไป','ทำงาน'],['bonnie_scenario_1']],
@@ -102,6 +117,10 @@ search_array = [
     [['ผช'], ['desc_men']],
     [['ผู้ชาย'], ['desc_men']],
 
+    [['ผญ'], ['ผญ_รีวิว_ผู้หญิง']],
+    [['ผู้หญิง'], ['ผญ_รีวิว_ผู้หญิง']],
+
+
     [['ไม่ฉุน'],['non_stink_1']],
     [['กลิ่น','อ่อน'],['gentle_smell_bonnie_sweetie_1','gentle_smell_bonnie_sweetie_2']],
     [['ตะกร้า'],['basket_123_1']],
@@ -112,7 +131,7 @@ search_array = [
     [['ลืม','แจ้ง'],['forget_to_select_1','forget_to_select_2']],
 
     [['ขนส่ง'],['shipping_1']],
-    [['แถม'], ['reply_bogof_1']],
+    [['แถม'], ['แถม_1แถม1ตะกร้าที่1เท่านั้น']],
     [['แท้'], ['partner_genuine_1']],
 ]
 
@@ -122,7 +141,7 @@ while(True):
     main = pygame.mixer.Sound(os.path.join(loop_path, clips[i]))
     print('['+time.strftime('%H:%M')+'][Main] : playing ' + clips[i] + ' | Duration :', int(main.get_length()), 'secs')
     pygame.mixer.Channel(0).queue(main)
-    main.set_volume(main_volume)
+    #main.set_volume(main_volume)
     #main.play()
     pygame.mixer.Channel(0).play(main)
 
@@ -163,7 +182,7 @@ while(True):
                         reply_file = reply_file + sound_ext
                         reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
                         print('['+time.strftime('%H:%M')+'][Reply] : play ' + reply_file + ' | Duration :', int(reply.get_length()), 'secs')
-                        reply.set_volume(main_volume)
+                        #reply.set_volume(main_volume)
                         pygame.mixer.Channel(1).play(reply)
                         
                         while pygame.mixer.Channel(1).get_busy():
@@ -184,7 +203,7 @@ while(True):
                         time.sleep(1)
                         print("Error: cannot move a file", os.path.join(comment_path, speech))
                         r = requests.post(url, headers=headers, data = {'message': 'Error: ' + reply_file})
-
+                        continue
         time.sleep(2)
 
     # play next clip
