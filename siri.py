@@ -38,6 +38,8 @@ async def on_comment(event: CommentEvent):
     while True:
         if mixer.get_busy():
             time.sleep(1)
+        else:
+            break
     
 # Define handling an event via a "callback"
 client.add_listener("comment", on_comment)
