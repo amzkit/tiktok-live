@@ -224,13 +224,14 @@ while(True):
             time.sleep(0.5)
             # if there is speech, pause main loop
             for speech in speech_queue:
+                speech_filename = speech
                 try:
                     pygame.mixer.Channel(0).pause()
                     reply_file = ''
 
-                    q = pygame.mixer.Sound(os.path.join(comment_path, speech))
+                    q = pygame.mixer.Sound(os.path.join(comment_path, speech_filename))
 
-                    print('['+time.strftime('%H:%M')+'][Speech] : play ' + speech + ' | Duration :', int(q.get_length()), 'secs')
+                    print('['+time.strftime('%H:%M')+'][Speech] : play ' + speech_filename + ' | Duration :', int(q.get_length()), 'secs')
                     pygame.mixer.Channel(1).play(q)
                     #q = pygame.mixer.Sound('comment\\'+speech)
                     #pygame.mixer.pause()
@@ -238,7 +239,7 @@ while(True):
                     #q.play()
                     speech = speech.split("_")[1:]
                     speech = '_'.join(speech)
-                    
+
                     while pygame.mixer.Channel(1).get_busy():
                         time.sleep(1)
                     
@@ -261,7 +262,7 @@ while(True):
 
                         if not os.path.exists(os.path.join(reply_path, reply_file)):
                             print("[ERROR] Missing reply file", reply_file)
-                            os.remove(os.path.join(comment_path, speech))
+                            os.remove(os.path.join(comment_path, speech_filename))
                             print('['+time.strftime('%H:%M')+'][Main] : resume ' + clips[i])
                             pygame.mixer.Channel(0).unpause()
                             continue
@@ -280,7 +281,7 @@ while(True):
                     pygame.mixer.Channel(0).unpause()
 
                     time.sleep(1)
-                    os.remove(os.path.join(comment_path, speech))
+                    os.remove(os.path.join(comment_path, speech_filename))
                 except FileNotFoundError:
                     time.sleep(1)
 
@@ -288,9 +289,9 @@ while(True):
                         print("[ERROR] FileNotFoundError:", os.path.join(reply_path, reply_file))
                         r = requests.post(url, headers=headers, data = {'message': 'Error: ตรวจสอบว่ามีไฟล์คำตอบจริงไหม ' + reply_file})
 
-                        if os.path.exists(os.path.join(comment_path, speech)):
-                            os.remove(os.path.join(comment_path, speech))
-                            print("[ERROR] The comment file has been removed", speech)
+                        if os.path.exists(os.path.join(comment_path, speech_filename)):
+                            os.remove(os.path.join(comment_path, speech_filename))
+                            print("[ERROR] The comment file has been removed", speech_filename)
 
                             #os.rename(os.path.join(comment_path, speech), os.path.join(comment_error_path, speech))
                             #print("[ERR] The file has been moved to error directory")
