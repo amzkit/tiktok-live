@@ -127,8 +127,8 @@ search_array = [
     [['ผช','หญิง'], ['unisex_ใช้ได้ทั้งผญ_ผช']],
     [['ชาย','ผญ'], ['unisex_ใช้ได้ทั้งผญ_ผช']],
 
-    [['ผช'], ['desc_men']],
-    [['ผู้ชาย'], ['desc_men']],
+    [['ผช'], ['รีวิวผช_ผช_รีวิวครบ_กลิ่นเทียบ']],
+    [['ผู้ชาย'], ['รีวิวผช_ผช_รีวิวครบ_กลิ่นเทียบ']],
 
     [['ผญ'], ['ผญ_รีวิว_ผู้หญิง']],
     [['ผู้หญิง'], ['ผญ_รีวิว_ผู้หญิง']],
@@ -229,14 +229,16 @@ while(True):
                     reply_file = ''
 
                     q = pygame.mixer.Sound(os.path.join(comment_path, speech))
-                    
+
                     print('['+time.strftime('%H:%M')+'][Speech] : play ' + speech + ' | Duration :', int(q.get_length()), 'secs')
                     pygame.mixer.Channel(1).play(q)
                     #q = pygame.mixer.Sound('comment\\'+speech)
                     #pygame.mixer.pause()
                     #pygame.time.wait(int(q.get_length()*1000))
                     #q.play()
-
+                    speech = speech.split("_")[1:]
+                    speech = '_'.join(speech)
+                    
                     while pygame.mixer.Channel(1).get_busy():
                         time.sleep(1)
                     
