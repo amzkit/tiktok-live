@@ -55,21 +55,36 @@ while True:
 
     time.sleep(waiting_seconds+1)
 
-    #"ดูเพิ่ม"
-    WebDriverWait(browser, 60).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//tbody/tr[1]/td[6]/div[1]/span[1]/div[1]/div[1]/div[1]/div[1]/button[1]//*[name()='svg']"))).click()
-    #ทำซ้ำ
-    WebDriverWait(browser, 30).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//div[@data-tid='m4b_dropdown_menu']/div/div[contains(text(),'ทำซ้ำ')]"))).click()
-    affect_immediately_button = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[contains(text(),'มีผลทันที')]")))
-    location = affect_immediately_button.location_once_scrolled_into_view
-    location['y'] = location['y']-100
-    browser.execute_script("window.scrollTo(0,"+str(location['y'])+");")
-    affect_immediately_button.click()
+    try:
+        #"ดูเพิ่ม"
+        WebDriverWait(browser, 60).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//tbody/tr[1]/td[6]/div[1]/span[1]/div[1]/div[1]/div[1]/div[1]/button[1]//*[name()='svg']"))).click()
+        #ทำซ้ำ
+        WebDriverWait(browser, 30).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//div[@data-tid='m4b_dropdown_menu']/div/div[contains(text(),'ทำซ้ำ')]"))).click()
 
-    duration_input = browser.find_element(By.XPATH, "//input[@id='effectiveDuration_input']")
-    duration_input.clear()
-    duration_input.send_keys(Keys.CONTROL,"a")
-    duration_input.send_keys(Keys.DELETE)
-    duration_input.send_keys("20")
+    except:
+        print("[ERROR] Cannot duplicate a flashsale, refresh the page")
+        browser.get('https://seller-th.tiktok.com/promotion/marketing-tools/management?tab=1&promotion_type=1&shop_region=TH')
+        time.sleep(30)
+        continue
+
+    try:
+        affect_immediately_button = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[contains(text(),'มีผลทันที')]")))
+        location = affect_immediately_button.location_once_scrolled_into_view
+        location['y'] = location['y']-100
+        browser.execute_script("window.scrollTo(0,"+str(location['y'])+");")
+        affect_immediately_button.click()
+
+        duration_input = browser.find_element(By.XPATH, "//input[@id='effectiveDuration_input']")
+        duration_input.clear()
+        duration_input.send_keys(Keys.CONTROL,"a")
+        duration_input.send_keys(Keys.DELETE)
+        duration_input.send_keys("20")
+    except:
+        print("[ERROR] Cannot set the flashsale attributes, going back to the promotion page")
+        browser.get('https://seller-th.tiktok.com/promotion/marketing-tools/management?tab=1&promotion_type=1&shop_region=TH')
+        time.sleep(30)
+        continue
+
 
     created = False
     while not created:
@@ -97,4 +112,5 @@ while True:
                 time.sleep(waiting_seconds)
         else:
             created = True
+
     print("End Loop")
