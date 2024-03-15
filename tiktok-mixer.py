@@ -214,7 +214,7 @@ while(True):
     print('['+time.strftime('%H:%M')+'][Main] : playing ' + clips[i] + ' | Duration :', int(main.get_length()), 'secs')
     pygame.mixer.Channel(0).queue(main)
     #main.set_volume(main_volume)
-    #main.play()
+    #main.play()d:\apps\python\webauto\click_basket.py
     pygame.mixer.Channel(0).play(main)
 
     while pygame.mixer.get_busy():

@@ -2,18 +2,32 @@ import time
 import random
 import datetime
 import threading
+
 from dotenv import load_dotenv
+import os
+from distutils.util import strtobool
 
 load_dotenv()
 
 USER_PROFILE = os.getenv('USER_PROFILE')
+FLASHSALE_ENABLED = bool(strtobool(os.getenv('FLASHSALE_ENABLED', 'True')))
+COMMENT_ENABLED = bool(strtobool(os.getenv('COMMENT_ENABLED', 'True')))
+PINNING_ENABLED = bool(strtobool(os.getenv('PINNING_ENABLED', 'True')))
+
+print("Environment :")
+print("USER_PROFILE :", USER_PROFILE)
+print("FLASHSALE_ENABLED :", FLASHSALE_ENABLED)
+print("COMMENT_ENABLED :", COMMENT_ENABLED)
+print("PINNING_ENABLED :", PINNING_ENABLED)
 
 #GTTS Speech
 from gtts import gTTS
 
 from io import BytesIO
 from pygame import mixer
-import os
+
+#To hide pygame welcome message
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -25,15 +39,13 @@ from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 
 options = webdriver.ChromeOptions()
-options.add_argument(r"--user-data-dir="+USER_PROFILE) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
+options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
 options.add_argument(r'--remote-debugging-pipe')
 browser = webdriver.Chrome(options)
 
 browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
 
-flashsale_enabled = False
-comment_enabled = True
-pinning_enabled = True
+
 #login_with_email_btn = browser.find_element(By.ID,"TikTok_Ads_SSO_Login_Email_Panel_Button")
 #login_with_email_btn.click()
 #email_input = browser.find_element(By.ID,"TikTok_Ads_SSO_Login_Email_Input")
@@ -70,7 +82,6 @@ handles_before = browser.window_handles
 
 #save seller center window
 seller_center_window = browser.window_handles[0]
-live_windows = []
 
 #live_board_menu = browser.find_element(By.XPATH, '//button[text()="ไลฟ์บอร์ด"]') 
 for i in range(live_count):
@@ -94,6 +105,8 @@ WebDriverWait(browser, 30).until(lambda browser: len(handles_before) != len(brow
 products = []
 product_index = 0
 last_pin_time_epoch = 0
+live_windows = []
+
 for i in range(live_count):
     products.append([])
 
@@ -111,7 +124,9 @@ for i in range(live_count):
     dashboard = browser.find_elements(By.XPATH, "//div[@class='w-full h-[540px] rounded-lg p-8 relative flex-shrink-0']")[0]
     browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", dashboard)
     print('['+time.strftime('%H:%M')+'][LiveBoard] Ready')
-
+    
+    id = browser.find_elements(By.XPATH, "//span[@class='text-headingM'][4]")
+    created_time = browser.find_elements(By.XPATH, "//span[@class='text-headingM'][1]")
 
 #save products
 try:
@@ -126,16 +141,16 @@ except:
 ##############################################################
 ### Flashsale
 ##############################################################
-    
-# switch back to seller center
-browser.switch_to.window(seller_center_window)
+if FLASHSALE_ENABLED:    
+    # switch back to seller center
+    browser.switch_to.window(seller_center_window)
 
-# going to promotional page
-WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.ID, 'top_nav_seller_center_logo'))).click()
-# เมนู โปรโมชั่น
-WebDriverWait(browser, 30).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//div[@class='theme-m4b-menu-title-txt'][contains(text(),'โปรโมชั่น')]"))).click()
-# เมนูย่อย เครื่องมือโปรโมชั่น
-WebDriverWait(browser, 10).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//a[@id='menu_item_35']//div[1]"))).click()
+    # going to promotional page
+    WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.ID, 'top_nav_seller_center_logo'))).click()
+    # เมนู โปรโมชั่น
+    WebDriverWait(browser, 30).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//div[@class='theme-m4b-menu-title-txt'][contains(text(),'โปรโมชั่น')]"))).click()
+    # เมนูย่อย เครื่องมือโปรโมชั่น
+    WebDriverWait(browser, 10).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//a[@id='menu_item_35']//div[1]"))).click()
 
 ##############################################################
 
@@ -163,13 +178,14 @@ ending_time_str = ""
 
 #################################################################
 ### Chat
-last_process_comment_index = -1
-comments = []
-live_comment_saved_index = {}
-current_window_index = 0
+if COMMENT_ENABLED:
+    last_process_comment_index = -1
+    comments = []
+    live_comment_saved_index = {}
+    current_window_index = 0
 
-for window_index in range(live_count):
-    live_comment_saved_index[window_index] = 0
+    for window_index in range(live_count):
+        live_comment_saved_index[window_index] = 0
 
 def chat(browser, current_window_index):
     #print("window", window_index)
@@ -205,10 +221,10 @@ while True:
     #   Chat action
     ##################################
     try:
-        if(comment_enabled):
+        if COMMENT_ENABLED:
             current_window_index = (current_window_index + 1) % live_count
             chat(browser, current_window_index)
-        if(comment_enabled and last_process_comment_index < len(comments) - 1):
+        if COMMENT_ENABLED and last_process_comment_index < len(comments) - 1:
             last_process_comment_index = last_process_comment_index + 1
             #print("[Comment] Process Comment :", comments[last_process_comment_index])
             siri(comments[last_process_comment_index])
@@ -219,13 +235,13 @@ while True:
     #   Flashsale action
     ##################################
     try:
-        if flashsale_enabled and ending_time_str == "":
+        if FLASHSALE_ENABLED and ending_time_str == "":
             browser.switch_to.window(seller_center_window)
             WebDriverWait(browser, 20).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//table/tbody/tr/td/div/span/div")))
             ending_time_str = browser.find_elements(By.XPATH, "//table/tbody/tr/td[4]/div/span/div")[0].text
             print("[Flashsale] ending time :", ending_time_str)
 
-        if flashsale_enabled and flashsale_ended(ending_time_str):
+        if FLASHSALE_ENABLED and flashsale_ended(ending_time_str):
             print("[Flashsale] Time to create a flashsale")
             browser.switch_to.window(seller_center_window)
             #"ดูเพิ่ม"
@@ -279,7 +295,7 @@ while True:
     ##################################
     #print("[Product] check time to pin")
     try:
-        if(pinning_enabled and time_to_pin(last_pin_time_epoch)):
+        if(PINNING_ENABLED and time_to_pin(last_pin_time_epoch)):
             product_index = product_index % 10
             print('['+time.strftime('%H:%M')+'][Pinning] Time to pin ['+str(product_index)+"] ", end="")
             for live_index in range(live_count):
