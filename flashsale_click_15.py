@@ -20,7 +20,7 @@ from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 
 options = webdriver.ChromeOptions()
-options.add_argument(r"--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 19") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
+options.add_argument(r"--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 15") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
 options.add_argument(r'--remote-debugging-pipe')
 browser = webdriver.Chrome(options)
 
@@ -38,7 +38,7 @@ pinning_enabled = True
 #login_btn = browser.find_element(By.ID,"TikTok_Ads_SSO_Login_Btn")
 #login_btn.click()
 
-navbar = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.ID, "top_nav_menu_compass_v2")))
+navbar = WebDriverWait(browser, 120).until(ExpectedConditions.presence_of_element_located((By.ID, "top_nav_menu_compass_v2")))
 #navbar = browser.find_element(By.ID, "top_nav_menu_compass_v2")
 navbar.click()
 
