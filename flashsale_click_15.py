@@ -2,7 +2,8 @@ import time
 import random
 import datetime
 import threading
-
+import json
+from queue import Queue
 from dotenv import load_dotenv
 import os
 from distutils.util import strtobool
@@ -13,6 +14,8 @@ USER_PROFILE = os.getenv('USER_PROFILE')
 FLASHSALE_ENABLED = bool(strtobool(os.getenv('FLASHSALE_ENABLED', 'True')))
 COMMENT_ENABLED = bool(strtobool(os.getenv('COMMENT_ENABLED', 'True')))
 PINNING_ENABLED = bool(strtobool(os.getenv('PINNING_ENABLED', 'True')))
+TOKEN = json.loads(os.getenv('TOKEN', 'True').replace('\n', '').replace('\\',''))
+LINE_NOTIFY_URL = os.getenv('LINE_NOTIFY_URL')
 
 print("Environment :")
 print("USER_PROFILE :", USER_PROFILE)
@@ -28,6 +31,31 @@ from pygame import mixer
 
 #To hide pygame welcome message
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+
+#Line Notify
+import requests
+
+def notify(unique_id, message):
+    headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer ' + TOKEN[unique_id]}
+    r = requests.post(LINE_NOTIFY_URL, headers=headers, data = {'message':message})
+
+def notify_before_end(unique_id, time_diff):
+    #number of second to be waited until end - 300 (before 5 mins)
+    waiting_seconds = 14400 - (time_diff % 14400) - 300
+    if waiting_seconds > 0:
+        # sleep exactly the right amount of time
+        m, s = divmod(waiting_seconds, 60)
+        h, m = divmod(m, 60)
+        #print('['+time.strftime('%H:%M')+']['+unique_id+'] set notification in', f'{h:02d}:{m:02d}', 'hours')
+        time.sleep(waiting_seconds)
+        message = unique_id + ' is ending in 5 mins'
+        notify(unique_id, message)
+        time.sleep(300)
+        message = unique_id + ' is ended'
+        notify(unique_id, message)
+
+def remove(browser, element):
+    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", element)
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -78,7 +106,6 @@ while len(live_board_buttons) == 0:
 live_count = len(live_board_buttons)
 
 handles_before = browser.window_handles
-#print("before windows", handles_before)
 
 #save seller center window
 seller_center_window = browser.window_handles[0]
@@ -89,44 +116,66 @@ for i in range(live_count):
     browser.switch_to.window(browser.window_handles[0])
     live_board_button_xpath = "//div[@class='flex flex-col w-full']//div[@class='flex justify-between']//div[1]//button[1]"
     live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
-    print("[Product] live board opened")
+    print('['+time.strftime('%H:%M')+'][Product] live board opened')
 
 #print("after windows", browser.window_handles)
 
 #print("waiting for new window")
-
-#live_board_product_button = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//div[@id='arco-tabs-1-tab-1']//span[@class='arco-tabs-header-title-text']//span[1]")))
-#live_board_product_button = browser.find_element(By.XPATH, "//div[@id='arco-tabs-1-tab-1']//span[@class='arco-tabs-header-title-text']//span[1]")
-#live_board_product_button.click()
+    
+#wait for new window to open
 WebDriverWait(browser, 30).until(lambda browser: len(handles_before) != len(browser.window_handles))
 #new_window = WebDriverWait(browser, timeout=30).until(ExpectedConditions.new_window_is_opened(browser.window_handles))
 
 #init product button
 products = []
-product_index = 0
-last_pin_time_epoch = 0
-live_windows = []
-
 for i in range(live_count):
     products.append([])
 
-#open product tab
+product_index = 0
+last_pin_time_epoch = 0
+lives = []
+
+#Openning a live board tab
 for i in range(live_count):
     #switch to new tab
     browser.switch_to.window(browser.window_handles[i+1])
-    live_windows.append(browser.window_handles[i+1])
     #print("[Live Windows] Added", browser.window_handles[i+1])
     #print("[Product] switched to window", i+1, "["+browser.window_handles[i+1]+"]")
     product_tab = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[@class='text-headingL hover:text-text1 transition-colors text-text3'][contains(text(),'สินค้า')]")))
     product_tab.click()
+
     live_video = browser.find_elements(By.XPATH, "//div[@class='h-[480px] w-full relative flex-shrink-0']")[0]
-    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", live_video)
+    #browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", live_video)
+    remove(browser, live_video)
     dashboard = browser.find_elements(By.XPATH, "//div[@class='w-full h-[540px] rounded-lg p-8 relative flex-shrink-0']")[0]
-    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", dashboard)
+    #browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", dashboard)
+    remove(browser, dashboard)
     print('['+time.strftime('%H:%M')+'][LiveBoard] Ready')
+
+    unique_id = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[3].text
+    created_time = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[0].text
+    lives.append({'index':i, 'window_id':browser.window_handles[i+1], 'unique_id':unique_id, 'created_time':created_time})
+
+#Notify Before End
+for i in range(live_count):
+
+    time_now = int(time.time())
     
-    id = browser.find_elements(By.XPATH, "//span[@class='text-headingM'][4]")
-    created_time = browser.find_elements(By.XPATH, "//span[@class='text-headingM'][1]")
+    create_time = datetime.datetime.strptime(lives[i]['created_time'], '%H:%M:%S %Y-%m-%d')
+    create_time_epoch = int(create_time.timestamp())
+
+    #check how many seconds have been passed since room created
+    time_diff = time_now - create_time_epoch
+
+    #check how many round for each 4hours passes
+    round_count = int(time_diff / 14400)
+
+    #find ending time (each 4 hours since created)
+    ending_time_epoch = create_time_epoch + 14400*(round_count+1)
+    ending_time_str = time.strftime('%H:%M', time.localtime(ending_time_epoch))
+
+    thread = threading.Thread(target=notify_before_end, args={unique_id:unique_id, time_diff:time_diff})
+    thread.start()
 
 #save products
 try:
@@ -179,41 +228,32 @@ ending_time_str = ""
 #################################################################
 ### Chat
 if COMMENT_ENABLED:
-    last_process_comment_index = -1
     comments = []
-    live_comment_saved_index = {}
     current_window_index = 0
-
-    for window_index in range(live_count):
-        live_comment_saved_index[window_index] = 0
 
 def chat(browser, current_window_index):
     #print("window", window_index)
-    browser.switch_to.window(live_windows[current_window_index])
-    #print("Switch to ", current_window_index)
-    temp_users = browser.find_elements(By.XPATH, "//div[@class='py-2 px-4 rounded-full bg-brand-hover bg-opacity-[.14] break-words mb-4']/span/span[1]")
-    temp_comments = browser.find_elements(By.XPATH, "//div[@class='py-2 px-4 rounded-full bg-brand-hover bg-opacity-[.14] break-words mb-4']/span[2]")
-    for comment_index in range(live_comment_saved_index[current_window_index], len(temp_users)):
-        index = len(comments)
-        comments.append({'index': index, 'user':temp_users[comment_index].text, 'comment':temp_comments[comment_index].text})
-        live_comment_saved_index[current_window_index] = live_comment_saved_index[current_window_index] + 1
-    #print(window_index, comments)
+    browser.switch_to.window(lives[current_window_index]['window_id'])
+    temp_comments = browser.find_elements(By.XPATH, "//div[@class='py-2 px-4 rounded-full bg-brand-hover bg-opacity-[.14] break-words mb-4']")
+    for i in range(len(temp_comments)):
+        notify(lives[current_window_index]['unique_id'], temp_comments[i].text)
+        user = temp_comments[i].text.split(':')[0]
+        comment = ' '.join(temp_comments[i].text.split(':')[1:])
+        siri(user, comment)
+        remove(browser, temp_comments[i])
 
-def siri(comment_dict):
-    user = comment_dict['user']
-    comment = comment_dict['comment']
+def siri(user, comment):
     print('['+time.strftime('%H:%M')+'][Comment][' + user + '] : ' + comment)
     message = user + ' : ' + comment
-    #notify(message)
     if len(comment) > 0 and comment[0] == "@" and len(comment.split()) > 1:
         comment = comment.split()[1:]
         comment = ' '.join(comment) 
-    #r = requests.post(url, headers=headers, data = {'message':message})
     tts = gTTS(comment, lang='th')
     filename = str(int(time.time())) + '_' + comment
     tts.save(os.path.join('comment', filename +'.ogg'))
 
 
+# CLI Command Line Interface
 
 
 while True:
@@ -224,11 +264,6 @@ while True:
         if COMMENT_ENABLED:
             current_window_index = (current_window_index + 1) % live_count
             chat(browser, current_window_index)
-        if COMMENT_ENABLED and last_process_comment_index < len(comments) - 1:
-            last_process_comment_index = last_process_comment_index + 1
-            #print("[Comment] Process Comment :", comments[last_process_comment_index])
-            siri(comments[last_process_comment_index])
-            time.sleep(1)
     except:
         print('['+time.strftime('%H:%M')+'][Comment] Error')
     ##################################
@@ -317,9 +352,3 @@ while True:
         print('['+time.strftime('%H:%M')+'][Pinning] Error')
 
     time.sleep(1)
-
-
-
-
-
-
