@@ -2,6 +2,11 @@ import time
 import random
 import datetime
 import threading
+from dotenv import load_dotenv
+
+load_dotenv()
+
+USER_PROFILE = os.getenv('USER_PROFILE')
 
 #GTTS Speech
 from gtts import gTTS
@@ -20,7 +25,7 @@ from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 
 options = webdriver.ChromeOptions()
-options.add_argument(r"--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 15") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
+options.add_argument(r"--user-data-dir="+USER_PROFILE) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
 options.add_argument(r'--remote-debugging-pipe')
 browser = webdriver.Chrome(options)
 
@@ -101,7 +106,12 @@ for i in range(live_count):
     #print("[Product] switched to window", i+1, "["+browser.window_handles[i+1]+"]")
     product_tab = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[@class='text-headingL hover:text-text1 transition-colors text-text3'][contains(text(),'สินค้า')]")))
     product_tab.click()
-    print('['+time.strftime('%H:%M')+'][Product] product tab ready')
+    live_video = browser.find_elements(By.XPATH, "//div[@class='h-[480px] w-full relative flex-shrink-0']")[0]
+    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", live_video)
+    dashboard = browser.find_elements(By.XPATH, "//div[@class='w-full h-[540px] rounded-lg p-8 relative flex-shrink-0']")[0]
+    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", dashboard)
+    print('['+time.strftime('%H:%M')+'][LiveBoard] Ready')
+
 
 #save products
 try:
@@ -186,6 +196,9 @@ def siri(comment_dict):
     tts = gTTS(comment, lang='th')
     filename = str(int(time.time())) + '_' + comment
     tts.save(os.path.join('comment', filename +'.ogg'))
+
+
+
 
 while True:
     ##################################
