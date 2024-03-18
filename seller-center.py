@@ -16,6 +16,7 @@ COMMENT_ENABLED = bool(strtobool(os.getenv('COMMENT_ENABLED', 'True')))
 PINNING_ENABLED = bool(strtobool(os.getenv('PINNING_ENABLED', 'True')))
 TOKEN = json.loads(os.getenv('TOKEN', 'True').replace('\n', '').replace('\\',''))
 LINE_NOTIFY_URL = os.getenv('LINE_NOTIFY_URL')
+PRODUCTS = []
 #PRODUCTS = os.getenv('PRODUCTS', 'True')
 #print(PRODUCTS)
 #PRODUCTS = json.loads(os.getenv('PRODUCTS', 'True').replace('\n', '').replace('\\',''))
