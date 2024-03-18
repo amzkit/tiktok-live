@@ -49,3 +49,18 @@ if __name__ == '__main__':
     c = FirstApp()
     sys.exit(c.cmdloop())
 
+
+browser.switch_to.window(browser.window_handles[1])
+product_tab = WebDriverWait(browser, 3).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[@class='text-headingL hover:text-text1 transition-colors text-text3'][contains(text(),'สินค้า')]")))
+product_tab.click()
+product_tab.find_elements(By.XPATH, "//span[@class='text-headingL hover:text-text1 transition-colors text-text3'][contains(text(),'สินค้า')]")
+live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
+
+
+
+live_board_buttons[i].click()
+browser.switch_to.window(browser.window_handles[0])
+live_board_button_xpath = "//div[@class='flex flex-col w-full']//div[@class='flex justify-between']//div[1]//button[1]"
+live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
+print('['+time.strftime('%H:%M')+'][Product] live board opened')
+

@@ -16,6 +16,9 @@ COMMENT_ENABLED = bool(strtobool(os.getenv('COMMENT_ENABLED', 'True')))
 PINNING_ENABLED = bool(strtobool(os.getenv('PINNING_ENABLED', 'True')))
 TOKEN = json.loads(os.getenv('TOKEN', 'True').replace('\n', '').replace('\\',''))
 LINE_NOTIFY_URL = os.getenv('LINE_NOTIFY_URL')
+#PRODUCTS = os.getenv('PRODUCTS', 'True')
+#print(PRODUCTS)
+#PRODUCTS = json.loads(os.getenv('PRODUCTS', 'True').replace('\n', '').replace('\\',''))
 
 print("Environment :")
 print("USER_PROFILE :", USER_PROFILE)
@@ -83,13 +86,19 @@ browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
 #login_btn = browser.find_element(By.ID,"TikTok_Ads_SSO_Login_Btn")
 #login_btn.click()
 
+print("Finding Logo for dashboard page")
 navbar = WebDriverWait(browser, 120).until(ExpectedConditions.presence_of_element_located((By.ID, "top_nav_menu_compass_v2")))
 #navbar = browser.find_element(By.ID, "top_nav_menu_compass_v2")
 navbar.click()
 
+print("Finding a live analysis link")
 link = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, '//a[contains(@href,"/compass/live-analysis")]')))
 #link = browser.find_element(By.XPATH, '//a[contains(@href,"/compass/live-analysis")]')
 link.click()
+
+#browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
+
+
 
 # page after live-analysis
 #live_board_menu = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, '//button[text()="ไลฟ์บอร์ด"]')))
@@ -116,7 +125,7 @@ for i in range(live_count):
     browser.switch_to.window(browser.window_handles[0])
     live_board_button_xpath = "//div[@class='flex flex-col w-full']//div[@class='flex justify-between']//div[1]//button[1]"
     live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
-    print('['+time.strftime('%H:%M')+'][Product] live board opened')
+    #print('['+time.strftime('%H:%M')+'][Product] live board opened')
 
 #print("after windows", browser.window_handles)
 
@@ -126,13 +135,7 @@ for i in range(live_count):
 WebDriverWait(browser, 30).until(lambda browser: len(handles_before) != len(browser.window_handles))
 #new_window = WebDriverWait(browser, timeout=30).until(ExpectedConditions.new_window_is_opened(browser.window_handles))
 
-#init product button
-products = []
-for i in range(live_count):
-    products.append([])
 
-product_index = 0
-last_pin_time_epoch = 0
 lives = []
 
 #Openning a live board tab
@@ -141,7 +144,12 @@ for i in range(live_count):
     browser.switch_to.window(browser.window_handles[i+1])
     #print("[Live Windows] Added", browser.window_handles[i+1])
     #print("[Product] switched to window", i+1, "["+browser.window_handles[i+1]+"]")
-    product_tab = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[@class='text-headingL hover:text-text1 transition-colors text-text3'][contains(text(),'สินค้า')]")))
+    #product_tab = WebDriverWait(browser, 5).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[@class='text-headingL hover:text-text1 transition-colors text-text3'][contains(text(),'สินค้า')]")))
+    #product_tab = WebDriverWait(browser, 30).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//div[@role='tab']/span/span[2]")))
+    #product_tab = browser.find_elements(By.XPATH, "//div[@role='tab']/span/span[contains(text(),'สินค้า')]")[0]
+    # tab สินค้า
+    product_tab = WebDriverWait(browser, 5).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//div[@role='tab'][2]/span/span")))
+
     product_tab.click()
 
     live_video = browser.find_elements(By.XPATH, "//div[@class='h-[480px] w-full relative flex-shrink-0']")[0]
@@ -154,14 +162,15 @@ for i in range(live_count):
 
     unique_id = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[3].text
     created_time = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[0].text
-    lives.append({'index':i, 'window_id':browser.window_handles[i+1], 'unique_id':unique_id, 'created_time':created_time})
+    lives.append({'index':i, 'window_id':browser.window_handles[i+1], 'unique_id':unique_id, 'created_time':created_time, 'product_key_to_pin':'', 'product_count':0, 'products':{}})
+    #print("Live Initiated :", lives)
 
 #Notify Before End
-for i in range(live_count):
+for live_index in range(live_count):
 
     time_now = int(time.time())
     
-    create_time = datetime.datetime.strptime(lives[i]['created_time'], '%H:%M:%S %Y-%m-%d')
+    create_time = datetime.datetime.strptime(lives[live_index]['created_time'], '%H:%M:%S %Y-%m-%d')
     create_time_epoch = int(create_time.timestamp())
 
     #check how many seconds have been passed since room created
@@ -177,15 +186,69 @@ for i in range(live_count):
     thread = threading.Thread(target=notify_before_end, args={unique_id:unique_id, time_diff:time_diff})
     thread.start()
 
-#save products
-try:
-    for i in range(live_count):
-        browser.switch_to.window(browser.window_handles[i+1])
-        for j in range(0, 10):
-            products[i].append(WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//tbody/tr["+ str(j+1) +"]/td[7]/div[1]/span[1]/button[1]/span[1]"))))
-    print('['+time.strftime('%H:%M')+'][Product] all pin elements saved')
-except:
-    print("[Product] pin elements cannot be found")
+##############################################################
+### Product Initial
+##############################################################
+#init product button
+
+def product_initial():
+    try:
+        for live_index in range(live_count):
+            browser.switch_to.window(browser.window_handles[i+1])
+            #wait for table to show up            
+            WebDriverWait(browser, 10).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//table/tbody/tr")))
+            product_elements = browser.find_elements(By.XPATH, "//table/tbody/tr")
+            #print("=================================================================\nProduct Elements:",product_elements)
+            lives[live_index]['product_count'] = len(product_elements)
+            #print("Lives :", lives[live_index])
+            for j in range(len(product_elements)):
+                title = product_elements[j].find_elements(By.XPATH, "./td/div/span/div/div[2]/div")[0].text
+                button = product_elements[j].find_elements(By.XPATH, "./td/div/span/button")[0]
+                lives[live_index]['products'][title] = button
+        print('['+time.strftime('%H:%M')+'][Product] all pin elements saved')
+    except:
+        print("[Product] pin elements cannot be found")
+        browser.refresh()
+
+def time_to_pin(last_pin_time_epoch):
+    now_epoch = int(datetime.datetime.now().timestamp())
+    next_pin_epoch = last_pin_time_epoch + 15 + (int(random.random()*100)) % 5 + 1
+    if(next_pin_epoch < now_epoch):
+        return True
+    else:
+        return False
+
+def next_product_key_to_pin(live_index):
+    #print("[Next Key To Pin]")
+    # Check if this is at the beginning
+    if lives[live_index]['product_key_to_pin'] == '':
+        next_product_key = list(lives[live_index]['products'].keys())[0]
+        lives[live_index]['product_key_to_pin'] = next_product_key
+        return next_product_key
+    # find next product key
+
+    if len(PRODUCTS) == 0:
+        keys = list(lives[live_index]['products'].keys())
+        #print("->keys", keys)
+        current_key_index = keys.index(lives[live_index]['product_key_to_pin'])
+        #print("->current_key", current_key_index)
+        next_key_index = current_key_index + 1
+        next_key_index = next_key_index % lives[live_index]['product_count']
+        #print("->next Key index", next_key_index)
+        next_product_key = keys[next_key_index]
+    else:
+        current_key_index = PRODUCTS.index(lives[live_index]['product_key_to_pin'])
+        next_key_index = current_key_index + 1
+        next_key_index = next_key_index % len(PRODUCTS)
+        next_product_key = PRODUCTS[next_key_index]
+
+    #print("->next product key", next_product_key)
+    lives[live_index]['product_key_to_pin'] = next_product_key
+    return next_product_key
+
+product_initial()
+#print("Product Initialized", lives[0]['products'])
+################################################################
 
 ##############################################################
 ### Flashsale
@@ -213,17 +276,9 @@ def flashsale_ended(ending_time_str):
     
 ###############################################################
 
-def time_to_pin(last_pin_time_epoch):
-    now_epoch = int(datetime.datetime.now().timestamp())
-    next_pin_epoch = last_pin_time_epoch + 15 + (int(random.random()*100)) % 5 + 1
-    if(next_pin_epoch < now_epoch):
-        return True
-    else:
-        return False
-    
-################################################################
-
 ending_time_str = ""
+
+
 
 #################################################################
 ### Chat
@@ -235,15 +290,16 @@ def chat(browser, current_window_index):
     #print("window", window_index)
     browser.switch_to.window(lives[current_window_index]['window_id'])
     temp_comments = browser.find_elements(By.XPATH, "//div[@class='py-2 px-4 rounded-full bg-brand-hover bg-opacity-[.14] break-words mb-4']")
+    unique_id = lives[current_window_index]['unique_id']
     for i in range(len(temp_comments)):
         notify(lives[current_window_index]['unique_id'], temp_comments[i].text)
         user = temp_comments[i].text.split(':')[0]
         comment = ' '.join(temp_comments[i].text.split(':')[1:])
-        siri(user, comment)
+        siri(unique_id, user, comment)
         remove(browser, temp_comments[i])
 
-def siri(user, comment):
-    print('['+time.strftime('%H:%M')+'][Comment][' + user + '] : ' + comment)
+def siri(unique_id, user, comment):
+    print('['+time.strftime('%H:%M')+']['+unique_id+'][Comment] ' + user + ' : ' + comment)
     message = user + ' : ' + comment
     if len(comment) > 0 and comment[0] == "@" and len(comment.split()) > 1:
         comment = comment.split()[1:]
@@ -252,9 +308,18 @@ def siri(user, comment):
     filename = str(int(time.time())) + '_' + comment
     tts.save(os.path.join('comment', filename +'.ogg'))
 
+######################################
+# Initiate for Loop
+######################################
+last_pin_time_epoch = 0
+######################################
 
-# CLI Command Line Interface
-
+for live_index in range(live_count):
+    print("===============================================")
+    print("Live ID :", lives[live_index]['unique_id'])
+    print("Product Count :", lives[live_index]['product_count'])
+    print("Start Time :", lives[live_index]['created_time'])
+print("===============================================")
 
 while True:
     ##################################
@@ -329,26 +394,22 @@ while True:
     #   Product pin action
     ##################################
     #print("[Product] check time to pin")
-    try:
-        if(PINNING_ENABLED and time_to_pin(last_pin_time_epoch)):
-            product_index = product_index % 10
-            print('['+time.strftime('%H:%M')+'][Pinning] Time to pin ['+str(product_index)+"] ", end="")
-            for live_index in range(live_count):
-                browser.switch_to.window(browser.window_handles[live_index+1])
-                try:
-                    browser.execute_script("arguments[0].scrollIntoView();", products[live_index][product_index])
-                    products[live_index][product_index].click()
-                    print("["+str(live_index)+"]", end="")
-                    #print("["+str(live_index)+"-"+str(product_index)+"]", end="")
-                except:
-                    print("["+str(live_index)+"-"+str(product_index)+"] FAILED")
-                    time.sleep(1)
-                    continue
-            print("")
-
-            product_index = product_index + 1
-            last_pin_time_epoch = datetime.datetime.now().timestamp()
-    except:
-        print('['+time.strftime('%H:%M')+'][Pinning] Error')
-
+    if(PINNING_ENABLED and time_to_pin(last_pin_time_epoch)):
+        for live_index in range(live_count):
+            product_key = next_product_key_to_pin(live_index)
+            #print('Product_key', product_key)
+            browser.switch_to.window(browser.window_handles[live_index+1])
+            try:
+                products_temp = lives[live_index]['products']
+                browser.execute_script("arguments[0].scrollIntoView();", lives[live_index]['products'][product_key])
+                lives[live_index]['products'][product_key].click()
+            except:
+                print('['+time.strftime('%H:%M')+']['+str(lives[live_index]['unique_id'])+"]["+str(product_key)+"] Failed to clicked")
+                product_initial()
+                time.sleep(1)
+                continue
+            print('['+time.strftime('%H:%M')+']['+str(lives[live_index]['unique_id'])+"]["+str(product_key)+"] has been pinned")
+        last_pin_time_epoch = int(datetime.datetime.now().timestamp())
+    
+    #The End of Loop
     time.sleep(1)
