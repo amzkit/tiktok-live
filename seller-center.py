@@ -198,7 +198,7 @@ for unique_id in unique_ids:
     thread.start()
 
 def switch(unique_id):
-    print("[Switch to]", unique_id)
+    #print("[Switch to]", unique_id)
     browser.switch_to.window(lives[unique_id]['window_id'])
 
 ##############################################################
@@ -235,8 +235,8 @@ def time_to_pin(last_pin_time_epoch):
 
 def next_product_key_to_pin(unique_id):
     #print("[Next Key To Pin]")
-    print("[NEXT_TO_PIN]["+unique_id+"]")
-    print("Live :", lives[unique_id])
+    #print("[NEXT_TO_PIN]["+unique_id+"]")
+    #print("Live :", lives[unique_id])
     # Check if this is at the beginning
     if lives[unique_id]['product_key_to_pin'] == '':
         next_product_key = list(lives[unique_id]['products'].keys())[0]
@@ -415,9 +415,9 @@ while True:
     #print("[Product] check time to pin")
     if(PINNING_ENABLED and time_to_pin(last_pin_time_epoch)):
         for unique_id in unique_ids:
-            print("[LOOP][UniqueID]", unique_id)
+            #print("[LOOP][UniqueID]", unique_id)
             product_key = next_product_key_to_pin(unique_id)
-            print("[LOOP][UniqueID][product_key]", product_key)
+            #print("[LOOP][UniqueID][product_key]", product_key)
             #print('Product_key', product_key)
             switch(unique_id)
             try:
