@@ -28,12 +28,12 @@ print("PINNING_ENABLED :", PINNING_ENABLED)
 
 #GTTS Speech
 from gtts import gTTS
-
 from io import BytesIO
+
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from pygame import mixer
 
 #To hide pygame welcome message
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 #Line Notify
 import requests
