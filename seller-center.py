@@ -57,9 +57,6 @@ def notify_before_end(unique_id, time_diff):
         message = unique_id + ' is ended'
         notify(unique_id, message)
 
-def remove(browser, element):
-    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", element)
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -137,28 +134,49 @@ WebDriverWait(browser, 30).until(lambda browser: len(handles_before) != len(brow
 lives = {}
 unique_ids = []
 
-#Openning a live board tab
-for i in range(live_count):
-    #switch to new tab
-    browser.switch_to.window(browser.window_handles[i+1])
-    #print("[Live Windows] Added", browser.window_handles[i+1])
-    #print("[Product] switched to window", i+1, "["+browser.window_handles[i+1]+"]")
-    #product_tab = WebDriverWait(browser, 5).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[@class='text-headingL hover:text-text1 transition-colors text-text3'][contains(text(),'สินค้า')]")))
-    #product_tab = WebDriverWait(browser, 30).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//div[@role='tab']/span/span[2]")))
-    #product_tab = browser.find_elements(By.XPATH, "//div[@role='tab']/span/span[contains(text(),'สินค้า')]")[0]
+
+def removeElement(element):
+    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", element)
+
+def removeClass(element):
+    browser.execute_script("arguments[0].setAttribute('class','')", element)
+
+def initialize_live_board(window_index):
+    browser.switch_to.window(window_index)
+    #print("[Live Windows] Added", window_index)
+    #print("[Product] switched to window", i+1, "["+window_index+"]")
     # tab สินค้า
     #print('['+time.strftime('%H:%M')+'] Waiting for Product Tab')
     product_tab = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//div[@role='tab'][2]/span/span")))
     product_tab.click()
-    #print("Product Tab clicked")
-
+    # Remove Live Video
     live_video = browser.find_elements(By.XPATH, "//div[@class='h-[480px] w-full relative flex-shrink-0']")[0]
-    #browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", live_video)
-    remove(browser, live_video)
+    removeElement(live_video)
+    # Remove Dashboard
     dashboard = browser.find_elements(By.XPATH, "//div[@class='w-full h-[540px] rounded-lg p-8 relative flex-shrink-0']")[0]
-    #browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", dashboard)
-    remove(browser, dashboard)
+    removeElement(dashboard)
+    # Remove Operation Tabs
+    tabs = browser.find_elements(By.XPATH, '//div[@class="arco-tabs arco-tabs-horizontal arco-tabs-line arco-tabs-top arco-tabs-size-default flex-shrink-0 pb-4"]')[0]
+    removeElement(tabs)
+    # counting table columns
+    time.sleep(3)
+    column_count = len(browser.find_elements(By.XPATH, "//table/thead/tr/th"))
+    # Remove column until 2 columns left; product_title, button
+    while column_count > 2:
+        header_2 = browser.find_elements(By.XPATH, "//table/thead/tr/th[2]")
+        for field in header_2:
+            removeElement(field)
+        column_2 = browser.find_elements(By.XPATH, "//table/tbody/tr/td[2]")
+        for field in column_2:
+            removeElement(field)
+        column_count = len(browser.find_elements(By.XPATH, "//table/thead/tr/th"))
 
+    # Remove space, layout
+    removeClass(browser.find_elements(By.XPATH, '//div[@class="arco-table arco-table-size-default arco-table-layout-fixed global-ecom-screen-table--V4c_A tableWrapper--AKiSO flex flex-col arco-table-scroll-position-both"]')[0])
+    removeClass(browser.find_elements(By.XPATH, '//div[@class="flex-1 flex flex-col mt-8 h-0"]')[0])
+    removeClass(browser.find_elements(By.XPATH, '//div[@class="flex flex-col h-full flex-1 min-w-0"]')[0])
+
+    # Initial lives
     unique_id = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[3].text
     created_time = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[0].text
     lives[unique_id] = {
@@ -171,29 +189,26 @@ for i in range(live_count):
         'products':{}
     }
     unique_ids.append(unique_id)
-    
     print('['+time.strftime('%H:%M')+'][LiveBoard]['+unique_id+'] Ready')
 
-    #print("Live Initiated :", lives)
-
+#Openning a live board tab
+for i in range(live_count):
+    #switch to new tab
+    window_index = browser.window_handles[i+1]
+    initialize_live_board(window_index)
+    
 #Notify Before End
 for unique_id in unique_ids:
-
     time_now = int(time.time())
-    
     create_time = datetime.datetime.strptime(lives[unique_id]['created_time'], '%H:%M:%S %Y-%m-%d')
     create_time_epoch = int(create_time.timestamp())
-
     #check how many seconds have been passed since room created
     time_diff = time_now - create_time_epoch
-
     #check how many round for each 4hours passes
     round_count = int(time_diff / 14400)
-
     #find ending time (each 4 hours since created)
     ending_time_epoch = create_time_epoch + 14400*(round_count+1)
     ending_time_str = time.strftime('%H:%M', time.localtime(ending_time_epoch))
-
     thread = threading.Thread(target=notify_before_end, args={unique_id:unique_id, time_diff:time_diff})
     thread.start()
 
@@ -201,20 +216,20 @@ def switch(unique_id):
     #print("[Switch to]", unique_id)
     browser.switch_to.window(lives[unique_id]['window_id'])
 
+def switch_to_main():
+    browser.switch_to.window(seller_center_window)
 ##############################################################
 ### Product Initial
 ##############################################################
 #init product button
 
 def product_initial():
-
     for unique_id in unique_ids:
         print('[Product Initial]['+unique_id+']')
         switch(unique_id)
         #wait for table to show up            
         WebDriverWait(browser, 10).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//table/tbody/tr")))
         product_elements = browser.find_elements(By.XPATH, "//table/tbody/tr")
-
         #print("=================================================================\nProduct Elements:",product_elements)
         lives[unique_id]['product_count'] = len(product_elements)
         #print("Lives :", lives[live_index])
@@ -243,7 +258,6 @@ def next_product_key_to_pin(unique_id):
         lives[unique_id]['product_key_to_pin'] = next_product_key
         return next_product_key
     # find next product key
-
     if len(PRODUCTS) == 0 or len(PRODUCTS[unique_id]) == 0:
         keys = list(lives[unique_id]['products'].keys())
         #print("->keys", keys)
@@ -261,7 +275,6 @@ def next_product_key_to_pin(unique_id):
         next_key_index = current_key_index + 1
         next_key_index = next_key_index % len(PRODUCTS[unique_id])
         next_product_key = products_temp[next_key_index]
-
     #print("->next product key", next_product_key)
     lives[unique_id]['product_key_to_pin'] = next_product_key
     return next_product_key
@@ -275,7 +288,7 @@ product_initial()
 ##############################################################
 if FLASHSALE_ENABLED:    
     # switch back to seller center
-    switch(seller_center_window)
+    switch_to_main()
     # going to promotional page
     WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.ID, 'top_nav_seller_center_logo'))).click()
     # เมนู โปรโมชั่น
@@ -315,7 +328,7 @@ def chat(browser, unique_id):
         user = temp_comments[i].text.split(':')[0]
         comment = ' '.join(temp_comments[i].text.split(':')[1:])
         siri(unique_id, user, comment)
-        remove(browser, temp_comments[i])
+        removeElement(browser, temp_comments[i])
 
 def siri(unique_id, user, comment):
     print('['+time.strftime('%H:%M')+']['+unique_id+'][Comment] ' + user + ' : ' + comment)
@@ -338,6 +351,7 @@ for unique_id in unique_ids:
     print("Live ID :", lives[unique_id]['unique_id'])
     print("Product Count :", lives[unique_id]['product_count'])
     print("Start Time :", lives[unique_id]['created_time'])
+
 print("===============================================")
 
 while True:
@@ -355,18 +369,31 @@ while True:
     ##################################
     try:
         if FLASHSALE_ENABLED and ending_time_str == "":
-            switch(seller_center_window)
+            switch_to_main()
             WebDriverWait(browser, 20).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//table/tbody/tr/td/div/span/div")))
             ending_time_str = browser.find_elements(By.XPATH, "//table/tbody/tr/td[4]/div/span/div")[0].text
             print("[Flashsale] ending time :", ending_time_str)
 
         if FLASHSALE_ENABLED and flashsale_ended(ending_time_str):
             print("[Flashsale] Time to create a flashsale")
-            switch(seller_center_window)
+            switch_to_main()
             #"ดูเพิ่ม"
             WebDriverWait(browser, 60).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//tbody/tr[1]/td[6]/div[1]/span[1]/div[1]/div[1]/div[1]/div[1]/button[1]//*[name()='svg']"))).click()
             #ทำซ้ำ
             WebDriverWait(browser, 30).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//div[@data-tid='m4b_dropdown_menu']/div/div[contains(text(),'ทำซ้ำ')]"))).click()
+            #try:
+                # Suggest Button
+            #    WebDriverWait(browser, 5).until(ExpectedConditions.element_to_be_clickable((By.XPATH, '//button/span/button[@data-tid="m4b_button"]/span')))
+            #    suggest_button = browser.find_elements(By.XPATH, '//button/span/button[@data-tid="m4b_button"]/span')
+            #    if(len(suggest_button) > 0):
+            #       suggest_button[0].click()
+            #        # Skip Tutorial Button
+            #        WebDriverWait(browser, 5).until(ExpectedConditions.element_to_be_clickable((By.XPATH, '//button/button[@data-tid="m4b_button"]/span')))
+            #        skip_button = browser.find_elements(By.XPATH, '//button/button[@data-tid="m4b_button"]/span')
+            #        if(len(suggest_button) > 0):
+            #            skip_button[0].click()
+            #except:
+            #    pass
             affect_immediately_button = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//span[contains(text(),'มีผลทันที')]")))
             location = affect_immediately_button.location_once_scrolled_into_view
             location['y'] = location['y']-100
