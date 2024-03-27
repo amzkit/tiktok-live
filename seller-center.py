@@ -159,26 +159,28 @@ def initialize_live_board(window_index):
     # Remove Operation Tabs
     tabs = browser.find_elements(By.XPATH, '//div[@class="arco-tabs arco-tabs-horizontal arco-tabs-line arco-tabs-top arco-tabs-size-default flex-shrink-0 pb-4"]')[0]
     removeElement(tabs)
-    # counting table columns
-    time.sleep(3)
-    column_count = len(browser.find_elements(By.XPATH, "//table/thead/tr/th"))
-    # Remove column until 2 columns left; product_title, button
-    while column_count > 2:
-        header_2 = browser.find_elements(By.XPATH, "//table/thead/tr/th[2]")
-        for field in header_2:
-            removeElement(field)
-        column_2 = browser.find_elements(By.XPATH, "//table/tbody/tr/td[2]")
-        for field in column_2:
-            removeElement(field)
-        column_count = len(browser.find_elements(By.XPATH, "//table/thead/tr/th"))
 
+    # counting table columns
+    #time.sleep(3)
+    #column_count = len(browser.find_elements(By.XPATH, "//table/thead/tr/th"))
+    # Remove column until 2 columns left; product_title, button
+    #while column_count > 2:
+    #    header_2 = browser.find_elements(By.XPATH, "//table/thead/tr/th[2]")
+    #    for field in header_2:
+    #        removeElement(field)
+    #    column_2 = browser.find_elements(By.XPATH, "//table/tbody/tr/td[2]")
+    #    for field in column_2:
+    #        removeElement(field)
+    #    column_count = len(browser.find_elements(By.XPATH, "//table/thead/tr/th"))
+    #
     # Remove space, layout
-    try:
-        removeClass(browser.find_elements(By.XPATH, '//div[@class="arco-table arco-table-size-default arco-table-layout-fixed global-ecom-screen-table--V4c_A tableWrapper--AKiSO flex flex-col arco-table-scroll-position-both"]')[0])
-        removeClass(browser.find_elements(By.XPATH, '//div[@class="flex-1 flex flex-col mt-8 h-0"]')[0])
-        removeClass(browser.find_elements(By.XPATH, '//div[@class="flex flex-col h-full flex-1 min-w-0"]')[0])
-    except:
-        print("CANNOT ADJUST LAYOUT")
+    #try:
+    #    removeClass(browser.find_elements(By.XPATH, '//div[@class="arco-table arco-table-size-default arco-table-layout-fixed global-ecom-screen-table--V4c_A tableWrapper--AKiSO flex flex-col arco-table-scroll-position-both"]')[0])
+    #    removeClass(browser.find_elements(By.XPATH, '//div[@class="flex-1 flex flex-col mt-8 h-0"]')[0])
+    #    removeClass(browser.find_elements(By.XPATH, '//div[@class="flex flex-col h-full flex-1 min-w-0"]')[0])
+    #except:
+    #    print("CANNOT ADJUST LAYOUT")
+    #
     # Initial lives
     unique_id = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[3].text
     created_time = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[0].text
