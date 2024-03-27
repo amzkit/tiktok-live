@@ -10,9 +10,8 @@ from distutils.util import strtobool
 
 load_dotenv()
 
-seller_id = 0
-
-USER_PROFILE = json.loads(os.getenv('USER_PROFILE', 'True').replace('\n', ''))[seller_id]
+USER_PROFILE_1 = os.getenv('USER_PROFILE_1', 'True')
+USER_PROFILE = USER_PROFILE_1
 FLASHSALE_ENABLED = bool(strtobool(os.getenv('FLASHSALE_ENABLED', 'True')))
 COMMENT_ENABLED = bool(strtobool(os.getenv('COMMENT_ENABLED', 'True')))
 PINNING_ENABLED = bool(strtobool(os.getenv('PINNING_ENABLED', 'True')))
