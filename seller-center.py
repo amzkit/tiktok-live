@@ -325,7 +325,8 @@ if COMMENT_ENABLED:
 
 def chat(browser, unique_id):
     #print("window", window_index)
-    switch(unique_id)
+    if(live_count > 1):
+        switch(unique_id)
     temp_comments = browser.find_elements(By.XPATH, "//div[@class='py-2 px-4 rounded-full bg-brand-hover bg-opacity-[.14] break-words mb-4']")
     unique_id = lives[unique_id]['unique_id']
     for i in range(len(temp_comments)):
