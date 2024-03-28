@@ -23,6 +23,10 @@ loop_path = 'loop'
 
 sound_ext = '.ogg'
 
+# Remove stale_comments
+stale_comments = os.listdir(comment_path)
+for file in stale_comments:
+    os.remove(os.path.join(comment_path, file))
 
 #play blackground music
 import subprocess

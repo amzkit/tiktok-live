@@ -1,4 +1,5 @@
 import time
+import sys
 import random
 import datetime
 import threading
@@ -10,8 +11,9 @@ from distutils.util import strtobool
 
 load_dotenv()
 
-USER_PROFILE_1 = os.getenv('USER_PROFILE_1', 'True')
-USER_PROFILE = USER_PROFILE_1
+id = sys.argv[1]
+
+USER_PROFILE = os.getenv('USER_PROFILE_'+str(id), 'True')
 FLASHSALE_ENABLED = bool(strtobool(os.getenv('FLASHSALE_ENABLED', 'True')))
 COMMENT_ENABLED = bool(strtobool(os.getenv('COMMENT_ENABLED', 'True')))
 PINNING_ENABLED = bool(strtobool(os.getenv('PINNING_ENABLED', 'True')))
@@ -72,8 +74,8 @@ options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\Ap
 options.add_argument(r'--remote-debugging-pipe')
 browser = webdriver.Chrome(options)
 
-browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
-
+#browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
+browser.get('https://seller-th.tiktok.com/compass/live-analysis?shop_region=TH')
 
 #login_with_email_btn = browser.find_element(By.ID,"TikTok_Ads_SSO_Login_Email_Panel_Button")
 #login_with_email_btn.click()
@@ -85,56 +87,77 @@ browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
 #login_btn.click()
 
 #print("Finding Logo for dashboard page")
-navbar = WebDriverWait(browser, 120).until(ExpectedConditions.presence_of_element_located((By.ID, "top_nav_menu_compass_v2")))
-#navbar = browser.find_element(By.ID, "top_nav_menu_compass_v2")
-navbar.click()
+#navbar = WebDriverWait(browser, 6000).until(ExpectedConditions.presence_of_element_located((By.XPATH, 'top_nav_menu_compass_v2')))
+#navbar = WebDriverWait(browser, 6000).until(ExpectedConditions.presence_of_element_located((By.XPATH, '//a[contains(@href,"/compass/data-overview")]')))
+#navbar.click()
 
 #print("Finding a live analysis link")
-link = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, '//a[contains(@href,"/compass/live-analysis")]')))
 #link = browser.find_element(By.XPATH, '//a[contains(@href,"/compass/live-analysis")]')
-link.click()
+#link = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, '//a[contains(@href,"/compass/live-analysis")]')))
+#link.click()
+
+#save seller center mainwindow
+seller_center_window = browser.window_handles[0]
+
+def switch(unique_id):
+    #print("[Switch to]", unique_id)
+    browser.switch_to.window(lives[unique_id]['window_id'])
+
+def switch_to_main():
+    browser.switch_to.window(seller_center_window)
+
+def close_tab(unique_id):
+    switch(unique_id)
+    browser.close()
 
 #browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
 
+
+###################################################
 # page after live-analysis
-#live_board_menu = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, '//button[text()="ไลฟ์บอร์ด"]')))
-#live_board_button_xpath = "//div[@class='theme-arco-tabs-content theme-arco-tabs-content-horizontal']//div[2]//div[2]//div[1]//div[1]//button[1]"
-live_board_button_xpath = "//div[@class='flex flex-col w-full']//div[@class='flex justify-between']//div[1]//button[1]"
-live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
+# click on going on live session tab "ไลฟ์ที่กำลังดำเนินอยู่"
+def live_session_tab():
+    live_tab = None
+    live_tabs = browser.find_elements(By.XPATH, '//div[@class="inline-flex items-center"]/div[1]')
+    for i in range(len(live_tabs)):
+        if('ไล' in live_tabs[i].text):
+            live_tab = live_tabs[i]
+            break
+    if(live_tab != None):
+        live_tab.click()
 
-while len(live_board_buttons) == 0:
-    time.sleep(1)
-    live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
-
-
-live_count = len(live_board_buttons)
-
+# find in a link to live session "ไลฟ์บอร์ด"
+live_count = 0
 handles_before = browser.window_handles
 
-#save seller center window
-seller_center_window = browser.window_handles[0]
-
-#live_board_menu = browser.find_element(By.XPATH, '//button[text()="ไลฟ์บอร์ด"]') 
-for i in range(live_count):
-    print('['+time.strftime('%H:%M')+'] opening a live board')
-    live_board_buttons[i].click()
-    browser.switch_to.window(browser.window_handles[0])
+def open_live_session():
+    switch_to_main()
+    while True:
+        live_session_tab()
+        live_board_button_xpath = "//div[@class='flex flex-col w-full']//div[@class='flex justify-between']//div[1]//button[1]"
+        live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
+        if len(live_board_buttons) > 0:
+            break
+        time.sleep(1)
+    #refresh live board buttons
     live_board_button_xpath = "//div[@class='flex flex-col w-full']//div[@class='flex justify-between']//div[1]//button[1]"
     live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
-    #print('['+time.strftime('%H:%M')+'][Product] live board opened')
+    live_count = len(live_board_buttons)
+    #open live board session
+    for i in range(live_count):
+        print('['+time.strftime('%H:%M')+'][LiveBoard] Open')
+        live_board_buttons[i].click()
+        switch_to_main()
+        #print('['+time.strftime('%H:%M')+'][Product] live board opened')
+    return live_count
 
-#print("after windows", browser.window_handles)
+live_count = open_live_session()
 
-#print("waiting for new window")
-    
 #wait for new window to open
 WebDriverWait(browser, 30).until(lambda browser: len(handles_before) != len(browser.window_handles))
-#new_window = WebDriverWait(browser, timeout=30).until(ExpectedConditions.new_window_is_opened(browser.window_handles))
-
 
 lives = {}
 unique_ids = []
-
 
 def removeElement(element):
     browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", element)
@@ -144,10 +167,10 @@ def removeClass(element):
 
 def initialize_live_board(window_index):
     browser.switch_to.window(window_index)
-    #print("[Live Windows] Added", window_index)
-    #print("[Product] switched to window", i+1, "["+window_index+"]")
+    print("[Live Windows] Added", window_index)
+    print("[Product] switched to window", i+1, "["+window_index+"]")
     # tab สินค้า
-    #print('['+time.strftime('%H:%M')+'] Waiting for Product Tab')
+    print('['+time.strftime('%H:%M')+'] Waiting for Product Tab')
     product_tab = WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//div[@role='tab'][2]/span/span")))
     product_tab.click()
     # Remove Live Video
@@ -159,7 +182,9 @@ def initialize_live_board(window_index):
     # Remove Operation Tabs
     tabs = browser.find_elements(By.XPATH, '//div[@class="arco-tabs arco-tabs-horizontal arco-tabs-line arco-tabs-top arco-tabs-size-default flex-shrink-0 pb-4"]')[0]
     removeElement(tabs)
-
+    ################################################
+    # Adjust product table, remove element and remove class
+    #
     # counting table columns
     #time.sleep(3)
     #column_count = len(browser.find_elements(By.XPATH, "//table/thead/tr/th"))
@@ -180,7 +205,7 @@ def initialize_live_board(window_index):
     #    removeClass(browser.find_elements(By.XPATH, '//div[@class="flex flex-col h-full flex-1 min-w-0"]')[0])
     #except:
     #    print("CANNOT ADJUST LAYOUT")
-    #
+    ##################################################
     # Initial lives
     unique_id = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[3].text
     created_time = browser.find_elements(By.XPATH, "//span[@class='text-headingM']")[0].text
@@ -197,11 +222,13 @@ def initialize_live_board(window_index):
     print('['+time.strftime('%H:%M')+'][LiveBoard]['+unique_id+'] Ready')
 
 #Openning a live board tab
+
 for i in range(live_count):
+    print("[LIVE_COUNT] Initializing")
     #switch to new tab
     window_index = browser.window_handles[i+1]
     initialize_live_board(window_index)
-    
+
 #Notify Before End
 for unique_id in unique_ids:
     time_now = int(time.time())
@@ -217,12 +244,6 @@ for unique_id in unique_ids:
     thread = threading.Thread(target=notify_before_end, args={unique_id:unique_id, time_diff:time_diff})
     thread.start()
 
-def switch(unique_id):
-    #print("[Switch to]", unique_id)
-    browser.switch_to.window(lives[unique_id]['window_id'])
-
-def switch_to_main():
-    browser.switch_to.window(seller_center_window)
 ##############################################################
 ### Product Initial
 ##############################################################
@@ -258,12 +279,16 @@ def next_product_key_to_pin(unique_id):
     #print("[NEXT_TO_PIN]["+unique_id+"]")
     #print("Live :", lives[unique_id])
     # Check if this is at the beginning
+    #print(unique_id)
     if lives[unique_id]['product_key_to_pin'] == '':
-        next_product_key = list(lives[unique_id]['products'].keys())[0]
+        #print("Empty key")
+        #next_product_key = list(lives[unique_id]['products'].keys())[0]
+        next_product_key = PRODUCTS[unique_id][0]
         lives[unique_id]['product_key_to_pin'] = next_product_key
+        #print('Product key to pin :', lives[unique_id]['product_key_to_pin'])
         return next_product_key
     # find next product key
-    if len(PRODUCTS) == 0 or len(PRODUCTS[unique_id]) == 0:
+    if len(PRODUCTS[unique_id]) == 0:
         keys = list(lives[unique_id]['products'].keys())
         #print("->keys", keys)
         current_key_index = keys.index(lives[unique_id]['product_key_to_pin'])
@@ -273,15 +298,22 @@ def next_product_key_to_pin(unique_id):
         #print("->next Key index", next_key_index)
         next_product_key = keys[next_key_index]
     else:
+        #print('Current product :', lives[unique_id]['product_key_to_pin'])
         products_temp   = []
         for product in PRODUCTS[unique_id]:
             products_temp.append(product)
-        current_key_index = products_temp.index(lives[unique_id]['product_key_to_pin'])
+            try:
+                current_key_index = products_temp.index(lives[unique_id]['product_key_to_pin'])
+            except:
+                # Cannot find .env product from live session product
+                current_key_index = 0
         next_key_index = current_key_index + 1
         next_key_index = next_key_index % len(PRODUCTS[unique_id])
         next_product_key = products_temp[next_key_index]
+
     #print("->next product key", next_product_key)
     lives[unique_id]['product_key_to_pin'] = next_product_key
+    #print('Next product :', lives[unique_id]['product_key_to_pin'])
     return next_product_key
 
 product_initial()
@@ -334,7 +366,7 @@ def chat(browser, unique_id):
         user = temp_comments[i].text.split(':')[0]
         comment = ' '.join(temp_comments[i].text.split(':')[1:])
         siri(unique_id, user, comment)
-        removeElement(browser, temp_comments[i])
+        removeElement(temp_comments[i])
 
 def siri(unique_id, user, comment):
     print('['+time.strftime('%H:%M')+']['+unique_id+'][Comment] ' + user + ' : ' + comment)
@@ -364,12 +396,10 @@ while True:
     ##################################
     #   Chat action
     ##################################
-    try:
-        if COMMENT_ENABLED:
-            current_window_index = (current_window_index + 1) % len(unique_ids)
-            chat(browser, unique_ids[current_window_index])
-    except:
-        print('['+time.strftime('%H:%M')+'][Comment] Error')
+    
+    if COMMENT_ENABLED:
+        current_window_index = (current_window_index + 1) % len(unique_ids)
+        chat(browser, unique_ids[current_window_index])
         
     ##################################
     #   Flashsale action
@@ -455,18 +485,22 @@ while True:
                 #print("[LOOP][UniqueID][product_key]", product_key)
                 #print('Product_key', product_key)
                 switch(unique_id)
-                try:
-                    products_temp = lives[unique_id]['products']
-                    browser.execute_script("arguments[0].scrollIntoView();", lives[unique_id]['products'][product_key])
-                    lives[unique_id]['products'][product_key].click()
-                except:
-                    print('['+time.strftime('%H:%M')+']['+str(lives[unique_id]['unique_id'])+"]["+str(product_key)+"] Failed to clicked")
-                    product_initial()
-                    time.sleep(1)
-                    continue
+                if product_key != '':
+                    try:
+                        products_temp = lives[unique_id]['products']
+                        browser.execute_script("arguments[0].scrollIntoView();", lives[unique_id]['products'][product_key])
+                        lives[unique_id]['products'][product_key].click()
+                    except:
+                        print('['+time.strftime('%H:%M')+']['+str(lives[unique_id]['unique_id'])+"]["+str(product_key)+"] Failed to clicked")
+                        product_initial()
+                        time.sleep(1)
+                        continue
                 print('['+time.strftime('%H:%M')+']['+str(lives[unique_id]['unique_id'])+"]["+str(product_key)+"] has been pinned")
             last_pin_time_epoch = int(datetime.datetime.now().timestamp())
         except:
             print('['+time.strftime('%H:%M')+'][ERROR] Pinning')
+            switch(unique_id)
+            close_tab(unique_id)
+            open_live_session()
     #The End of Loop
     time.sleep(1)

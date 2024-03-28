@@ -1,1 +1,0 @@
-python seller-center-2.py
