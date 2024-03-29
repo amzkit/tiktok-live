@@ -11,7 +11,7 @@ from distutils.util import strtobool
 
 load_dotenv()
 
-id = 0#sys.argv[1]
+id = sys.argv[1]
 
 USER_PROFILE = os.getenv('USER_PROFILE_'+str(id), 'True')
 FLASHSALE_ENABLED = bool(strtobool(os.getenv('FLASHSALE_ENABLED', 'True')))
