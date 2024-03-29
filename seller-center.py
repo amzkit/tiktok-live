@@ -11,7 +11,7 @@ from distutils.util import strtobool
 
 load_dotenv()
 
-id = sys.argv[1]
+id = 0#sys.argv[1]
 
 USER_PROFILE = os.getenv('USER_PROFILE_'+str(id), 'True')
 FLASHSALE_ENABLED = bool(strtobool(os.getenv('FLASHSALE_ENABLED', 'True')))
@@ -146,6 +146,8 @@ def open_live_session():
     #open live board session
     for i in range(live_count):
         print('['+time.strftime('%H:%M')+'][LiveBoard] Open')
+        live_board_button_xpath = "//div[@class='flex flex-col w-full']//div[@class='flex justify-between']//div[1]//button[1]"
+        live_board_buttons = browser.find_elements(By.XPATH, live_board_button_xpath)
         live_board_buttons[i].click()
         switch_to_main()
         #print('['+time.strftime('%H:%M')+'][Product] live board opened')
@@ -396,21 +398,22 @@ while True:
     ##################################
     #   Chat action
     ##################################
-    
+    #
     if COMMENT_ENABLED:
         current_window_index = (current_window_index + 1) % len(unique_ids)
         chat(browser, unique_ids[current_window_index])
-        
+    #
     ##################################
     #   Flashsale action
     ##################################
+    #    
     try:
         if FLASHSALE_ENABLED and ending_time_str == "":
             switch_to_main()
             WebDriverWait(browser, 20).until(ExpectedConditions.element_to_be_clickable((By.XPATH, "//table/tbody/tr/td/div/span/div")))
             ending_time_str = browser.find_elements(By.XPATH, "//table/tbody/tr/td[4]/div/span/div")[0].text
             print("[Flashsale] ending time :", ending_time_str)
-
+        #    
         if FLASHSALE_ENABLED and flashsale_ended(ending_time_str):
             print("[Flashsale] Time to create a flashsale")
             switch_to_main()
@@ -436,20 +439,20 @@ while True:
             location['y'] = location['y']-100
             browser.execute_script("window.scrollTo(0,"+str(location['y'])+");")
             affect_immediately_button.click()
-
+            #
             duration_input = browser.find_element(By.XPATH, "//input[@id='effectiveDuration_input']")
             duration_input.clear()
             duration_input.send_keys(Keys.CONTROL,"a")
             duration_input.send_keys(Keys.DELETE)
             duration_input.send_keys("20")
-
+            #
             confirm_button = browser.find_elements(By.XPATH, "//button[@class='theme-arco-btn theme-arco-btn-primary theme-arco-btn-size-default theme-arco-btn-shape-square theme-m4b-button ml-16']/span[contains(text(),'ตกลงและบันทึก')]")[1]
             location = confirm_button.location_once_scrolled_into_view
             browser.execute_script("window.scrollTo("+str(location['x'])+", document.body.scrollHeight);")
             confirm_button.click()
             #error_div = browser.find_elements(By.XPATH, "//div[contains(text(),'ไม่สามารถเพิ่มผลิตภัณฑ์ได้ 1 รายการ')]")
             time.sleep(2)
-            
+            #
             #check if there is an error
             error_confirm_button = browser.find_elements(By.XPATH, "//div[@role='dialog']/div/div/div/div/div/button[@data-tid='m4b_button']/span[contains(text(),'ยกเลิก')]")
             if(len(error_confirm_button)>0):
@@ -473,9 +476,11 @@ while True:
             print("[Flashsale] created")
     except:
         print('['+time.strftime('%H:%M')+'][Flashsale] Error')
+    #
     ##################################
     #   Product pin action
     ##################################
+    #
     #print("[Product] check time to pin")
     if(PINNING_ENABLED and time_to_pin(last_pin_time_epoch)):
         try:
@@ -502,5 +507,6 @@ while True:
             switch(unique_id)
             close_tab(unique_id)
             open_live_session()
+    #
     #The End of Loop
     time.sleep(1)
