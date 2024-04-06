@@ -64,7 +64,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 options = webdriver.ChromeOptions()
 #options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
 #options.add_argument(r'--remote-debugging-pipe')
-options.add_argument(r'--headless')
+#options.add_argument(r'--headless')
 options.add_argument(r'--disable-gpu')
 options.add_argument('log-level=3')
 driver = webdriver.Chrome(options)
