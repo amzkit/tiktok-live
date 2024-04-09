@@ -3,6 +3,8 @@ import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 clips = os.listdir('loop')
 
+from gtts import gTTS
+
 import pygame
 import random
 
@@ -320,13 +322,23 @@ while(True):
     main = pygame.mixer.Sound(os.path.join(loop_path, clips[i]))
     print('['+time.strftime('%H:%M')+'][Main] : playing ' + clips[i] + ' | Duration :', int(main.get_length()), 'secs')
     pygame.mixer.Channel(0).queue(main)
-    #main.set_volume(main_volume)
-    #main.play()d:\apps\python\webauto\click_basket.py
+    #main.set_volume(0)
     pygame.mixer.Channel(0).play(main)
 
     while pygame.mixer.get_busy():
         # Comment Found
         speech_queue = os.listdir(comment_path)
+        chats = requests.get("https://line.ininit.com/chats")
+        if(chats):
+            chats = chats.json()["chats"]
+            if(len(chats)):
+                for chat in chats:
+                    tts = gTTS(chat['text'], lang='th')
+
+                    filename = str(int(time.time())) + '_' + chat['text']
+                    #filename = ''.join(e for e in filename if e.isalnum())
+                    tts.save(os.path.join(comment_path, filename +'.ogg'))
+
         if len(speech_queue) > 0:
             time.sleep(0.5)
             # if there is speech, pause main loop
@@ -407,6 +419,7 @@ while(True):
                         #r = requests.post(url, headers=headers, data = {'message': 'Error: ' + reply_file})
                     finally:
                         pygame.mixer.Channel(0).unpause()
+        
 
         time.sleep(2)
 
