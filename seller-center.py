@@ -264,8 +264,9 @@ def product_initial():
         lives[unique_id]['product_count'] = len(product_elements)
         #print("Lives :", lives[live_index])
         for j in range(len(product_elements)):
-            title = product_elements[j].find_elements(By.XPATH, "./td/div/span/div/div[2]/div")[0].text
-            button = product_elements[j].find_elements(By.XPATH, "./td/div/span/button")[0]
+            #title = product_elements[j].find_elements(By.XPATH, "./td/div/span/div/div[2]/div")[0].text
+            title = browser.find_elements(By.XPATH, "//a[@class='cursor-pointer text-bodyL-regular w-[341px] truncate']")[j].text
+            button = browser.find_elements(By.XPATH, "//div/span/button")[j]
             lives[unique_id]['products'][title] = button
             print('[Product Initial]['+unique_id+'] '+title+' added')
     print('['+time.strftime('%H:%M')+'][Product] all pin elements saved')
