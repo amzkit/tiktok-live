@@ -11,7 +11,8 @@ from distutils.util import strtobool
 
 load_dotenv()
 
-id = sys.argv[1]
+#id = sys.argv[1]
+id = 0
 
 USER_PROFILE = os.getenv('USER_PROFILE_'+str(id), 'True')
 FLASHSALE_ENABLED = bool(strtobool(os.getenv('FLASHSALE_ENABLED', 'True')))
@@ -179,7 +180,8 @@ def initialize_live_board(window_index):
     live_video = browser.find_elements(By.XPATH, "//div[@class='h-[480px] w-full relative flex-shrink-0']")[0]
     removeElement(live_video)
     # Remove Dashboard
-    dashboard = browser.find_elements(By.XPATH, "//div[@class='w-full h-[540px] rounded-lg p-8 relative flex-shrink-0']")[0]
+    #dashboard = browser.find_elements(By.XPATH, "//div[@class='w-full h-[540px] rounded-lg p-8 relative flex-shrink-0']")[0]
+    dashboard = browser.find_elements(By.XPATH, "//div[@class='h-[540px] flex flex-col']")[0]
     removeElement(dashboard)
     # Remove Operation Tabs
     tabs = browser.find_elements(By.XPATH, '//div[@class="arco-tabs arco-tabs-horizontal arco-tabs-line arco-tabs-top arco-tabs-size-default flex-shrink-0 pb-4"]')[0]
@@ -312,7 +314,7 @@ def next_product_key_to_pin(unique_id):
         next_key_index = current_key_index + 1
         next_key_index = next_key_index % len(PRODUCTS[unique_id])
         next_product_key = products_temp[next_key_index]
-
+        #
     #print("->next product key", next_product_key)
     lives[unique_id]['product_key_to_pin'] = next_product_key
     #print('Next product :', lives[unique_id]['product_key_to_pin'])
