@@ -90,10 +90,10 @@ left_bar = WebDriverWait(driver, 30).until(ExpectedConditions.presence_of_elemen
 live_video = WebDriverWait(driver, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//div[@class='tiktok-10q5o1z-DivLiveContent e14c6d574']")))
 hide_chat_button = WebDriverWait(driver, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, "//div[@class='tiktok-1dnj95g-DivChatRoomHeaderIconContainer erwvzsp2']")))
 
-removeElement(top_bar)
-removeElement(left_bar)
-removeElement(live_video)
-removeElement(hide_chat_button)
+#removeElement(top_bar)
+#removeElement(left_bar)
+#removeElement(live_video)
+#removeElement(hide_chat_button)
 
 
 chats = driver.find_elements(By.XPATH, "//div[@data-e2e='chat-message']/div[2]/div[2]")
