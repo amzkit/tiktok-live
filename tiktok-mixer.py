@@ -300,6 +300,8 @@ search_array = [
     [['ตระกร้า', '8'],['ตะกร้าที่_8']],
     [['ตระกร้า', '9'],['ตะกร้าที่_9']],
 
+    [['2','3','ต่าง'],['2กับ3_ตอบ 2กับ3 ต่างกันยังไง']],
+
     [['อธิบาย','ทุก'],['ผญ_รีวิว_ผู้หญิง']],
     [['รีวิว','ทุก'],['ผญ_รีวิว_ผู้หญิง']],
     [['แนะ','ทุก'],['ผญ_รีวิว_ผู้หญิง']],
@@ -337,17 +339,17 @@ while(True):
     while pygame.mixer.get_busy():
         # Comment Found
         speech_queue = os.listdir(comment_path)
-        chats = requests.get("https://line.ininit.com/chats")
-        if(chats):
-            chats = chats.json()["chats"]
-            if(len(chats)):
-                for chat in chats:
-                    tts = gTTS(chat['text'], lang='th')
-
-                    filename = str(int(time.time())) + '_' + chat['text']
-                    #filename = ''.join(e for e in filename if e.isalnum())
-                    tts.save(os.path.join(comment_path, filename +'.ogg'))
-
+        #chats = requests.get("https://line.ininit.com/chats")
+        #if(chats):
+        #    chats = chats.json()["chats"]
+        #    if(len(chats)):
+        #        for chat in chats:
+        #            tts = gTTS(chat['text'], lang='th')
+        #
+        #            filename = str(int(time.time())) + '_' + chat['text']
+        #            #filename = ''.join(e for e in filename if e.isalnum())
+        #            tts.save(os.path.join(comment_path, filename +'.ogg'))
+        #
         if len(speech_queue) > 0:
             time.sleep(0.5)
             # if there is speech, pause main loop
