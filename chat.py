@@ -46,9 +46,16 @@ async def on_comment(event: CommentEvent) -> None:
     except:
         print('['+time.strftime('%H:%M')+']['+uid+'] Chat DB Store Error')
 
-    tts = gTTS(event.comment, lang='th')
-    filename = str(int(time.time())) + '_' + event.comment
-    tts.save('comment\\'+filename+'.mp3')
+    try:
+        tts = gTTS(event.comment, lang='th')
+    except:
+        print('['+time.strftime('%H:%M')+']['+uid+'] siri (gTTS) Error', tts)
+
+    try:
+        filename = str(int(time.time())) + '_' + event.comment
+        tts.save('comment\\'+filename+'.mp3')
+    except:
+        print('['+time.strftime('%H:%M')+']['+uid+'] Save File Error')
     #print(response)
 
 client.add_listener(CommentEvent, on_comment)
