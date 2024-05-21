@@ -388,7 +388,7 @@ while(True):
 
                     q = pygame.mixer.Sound(os.path.join(comment_path, speech_filename))
 
-                    print('['+time.strftime('%H:%M')+'][CHAT] ' + speech_filename + ' [' + str(int(q.get_length())) + 's]')
+                    print('['+time.strftime('%H:%M')+'][Chat] ' + speech_filename + ' [' + str(int(q.get_length())) + 's]')
                     pygame.mixer.Channel(1).play(q)
                     #q = pygame.mixer.Sound('comment\\'+speech)
                     #pygame.mixer.pause()
@@ -426,7 +426,7 @@ while(True):
 
                         reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
 
-                        print('['+time.strftime('%H:%M')+'][Reply] play ' + reply_file + ' [' + str(int(reply.get_length())), 's]')
+                        print('['+time.strftime('%H:%M')+'][Reply] play ' + reply_file + ' [' + str(int(reply.get_length())) + 's]')
                         #reply.set_volume(main_volume)
                         pygame.mixer.Channel(1).play(reply)
                         

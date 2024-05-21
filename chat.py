@@ -30,16 +30,23 @@ client: TikTokLiveClient = TikTokLiveClient(unique_id=uid)
 # Listen to an event with a decorator!
 @client.on(ConnectEvent)
 async def on_connect(event: ConnectEvent):
-    print(f"Connected to @{event.unique_id} (Room ID: {client.room_id}")
-
+    print('['+time.strftime('%H:%M')+']['+event.unique_id+'] Connected')
+    #print(f"Connected to @{event.unique_id} (Room ID: {client.room_id})")
 
 # Or, add it manually via "client.add_listener()"
 async def on_comment(event: CommentEvent) -> None:
-    print(f"[{uid}] {event.user.nickname} : {event.comment}")
-    response = requests.post(url, headers=headers, data = {'message': event.user.nickname + ':' + event.comment})
-    response = requests.post("https://line.ininit.com/chat/store", params={'comment': event.comment})
-    tts = gTTS(event.comment, lang='th')
+    print('['+time.strftime('%H:%M')+']['+uid+'] '+event.user.nickname+' : '+event.comment)
+    try:
+        response = requests.post(url, headers=headers, data = {'message': event.user.nickname + ':' + event.comment})
+    except:
+        print('['+time.strftime('%H:%M')+']['+uid+'] Line Notify Error')
+    
+    try:
+        response = requests.post("https://line.ininit.com/chat/store", params={'comment': event.comment})
+    except:
+        print('['+time.strftime('%H:%M')+']['+uid+'] Chat DB Store Error')
 
+    tts = gTTS(event.comment, lang='th')
     filename = str(int(time.time())) + '_' + event.comment
     tts.save('comment\\'+filename+'.mp3')
     #print(response)
