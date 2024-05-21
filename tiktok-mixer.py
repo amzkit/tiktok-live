@@ -351,7 +351,7 @@ i = 0
 while(True):
     #main loop
     main = pygame.mixer.Sound(os.path.join(loop_path, clips[i]))
-    print('['+time.strftime('%H:%M')+'][Loop] : ' + clips[i] + ' [', int(main.get_length()), 's]')
+    print('['+time.strftime('%H:%M')+'][Loop] ' + clips[i] + ' [' + str(int(main.get_length())) + 's]')
     pygame.mixer.Channel(0).queue(main)
     #main.set_volume(0)
     pygame.mixer.Channel(0).play(main)
@@ -375,13 +375,14 @@ while(True):
             # if there is speech, pause main loop
             for speech in speech_queue:
                 speech_filename = speech
+
                 try:
                     pygame.mixer.Channel(0).pause()
                     reply_file = ''
 
                     q = pygame.mixer.Sound(os.path.join(comment_path, speech_filename))
 
-                    print('['+time.strftime('%H:%M')+'][Speech] : ' + speech_filename + ' [', int(q.get_length()), 's]')
+                    print('['+time.strftime('%H:%M')+'][Speech] ' + speech_filename + ' [' + str(int(q.get_length())) + 's]')
                     pygame.mixer.Channel(1).play(q)
                     #q = pygame.mixer.Sound('comment\\'+speech)
                     #pygame.mixer.pause()
@@ -419,7 +420,7 @@ while(True):
 
                         reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
 
-                        print('['+time.strftime('%H:%M')+'][Reply] : play ' + reply_file + ' | Duration :', int(reply.get_length()), 'secs')
+                        print('['+time.strftime('%H:%M')+'][Reply] play ' + reply_file + ' [' + str(int(reply.get_length())), 's]')
                         #reply.set_volume(main_volume)
                         pygame.mixer.Channel(1).play(reply)
                         
@@ -427,11 +428,12 @@ while(True):
                             time.sleep(1)
                         reply_file = ''
                         
-                    print('['+time.strftime('%H:%M')+'][Main] : resume ' + clips[i])
+                    print('['+time.strftime('%H:%M')+'][Loop] resume ' + clips[i])
                     pygame.mixer.Channel(0).unpause()
 
                     time.sleep(1)
                     os.remove(os.path.join(comment_path, speech_filename))
+
                 except FileNotFoundError:
                     time.sleep(1)
 
@@ -450,8 +452,6 @@ while(True):
                         #r = requests.post(url, headers=headers, data = {'message': 'Error: ' + reply_file})
                     finally:
                         pygame.mixer.Channel(0).unpause()
-        
-
         time.sleep(2)
 
     # play next clip
