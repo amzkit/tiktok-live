@@ -1,5 +1,6 @@
 import time
 import os
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 clips = os.listdir('loop')
 
@@ -30,7 +31,12 @@ play_background_music = False
 # Remove stale_comments
 stale_comments = os.listdir(comment_path)
 for file in stale_comments:
-    os.remove(os.path.join(comment_path, file))
+    try:
+        os.remove(os.path.join(comment_path, file))
+    except:
+        print('['+time.strftime('%H:%M')+'][FATAL ERROR] ลบไฟล์เก่าไม่ได้ ' + file)
+        r = requests.post(url, headers=headers, data = {'message': 'มีไฟล์ที่ลบไม่ได้ '+file})
+        time.sleep(10)
 
 #play blackground music
 import subprocess
@@ -378,11 +384,11 @@ while(True):
 
                 try:
                     pygame.mixer.Channel(0).pause()
-                    reply_file = ''
+                    reply_file = -1
 
                     q = pygame.mixer.Sound(os.path.join(comment_path, speech_filename))
 
-                    print('['+time.strftime('%H:%M')+'][Speech] ' + speech_filename + ' [' + str(int(q.get_length())) + 's]')
+                    print('['+time.strftime('%H:%M')+'][CHAT] ' + speech_filename + ' [' + str(int(q.get_length())) + 's]')
                     pygame.mixer.Channel(1).play(q)
                     #q = pygame.mixer.Sound('comment\\'+speech)
                     #pygame.mixer.pause()
@@ -406,7 +412,7 @@ while(True):
                             break
                     #print("[TRY] searching for done", reply_file)
 
-                    if(reply_file != ''):
+                    if(reply_file != -1):
                         r = requests.post(url, headers=headers, data = {'message': 'ตอบกลับ ' + reply_file})
                         reply_file = reply_file + sound_ext
                         #print("[TRY] reply with ", reply_file)
@@ -426,8 +432,11 @@ while(True):
                         
                         while pygame.mixer.Channel(1).get_busy():
                             time.sleep(1)
-                        reply_file = ''
-                        
+                        reply_file = -1
+                    else:
+                        print('['+time.strftime('%H:%M')+'][NO REPLY]')
+                        r = requests.post(url, headers=headers, data = {'message': 'ไม่มีคำตอบสำหรับ ' + speech})
+  
                     print('['+time.strftime('%H:%M')+'][Loop] resume ' + clips[i])
                     pygame.mixer.Channel(0).unpause()
 
@@ -438,15 +447,16 @@ while(True):
                     time.sleep(1)
 
                     try:
-                        print("[ERROR] FileNotFoundError:", os.path.join(reply_path, reply_file))
-                        r = requests.post(url, headers=headers, data = {'message': 'Error: ตรวจสอบว่ามีไฟล์คำตอบจริงไหม ' + reply_file})
+                        if reply_file != -1:
+                            print("[ERROR] FileNotFoundError:", os.path.join(reply_path, reply_file))
+                            r = requests.post(url, headers=headers, data = {'message': 'Error: ตรวจสอบว่ามีไฟล์คำตอบจริงไหม ' + reply_file + ' จากคำถาม ' + speech})
 
-                        if os.path.exists(os.path.join(comment_path, speech_filename)):
-                            os.remove(os.path.join(comment_path, speech_filename))
-                            print("[ERROR] The comment file has been removed", speech_filename)
+                            if os.path.exists(os.path.join(comment_path, speech_filename)):
+                                os.remove(os.path.join(comment_path, speech_filename))
+                                print("[ERROR] The comment file has been removed", speech_filename)
 
-                            #os.rename(os.path.join(comment_path, speech), os.path.join(comment_error_path, speech))
-                            #print("[ERR] The file has been moved to error directory")
+                                #os.rename(os.path.join(comment_path, speech), os.path.join(comment_error_path, speech))
+                                #print("[ERR] The file has been moved to error directory")
                     except:
                         time.sleep(1)
                         #r = requests.post(url, headers=headers, data = {'message': 'Error: ' + reply_file})
