@@ -25,6 +25,8 @@ loop_path = 'loop'
 
 sound_ext = '.ogg'
 
+play_background_music = False
+
 # Remove stale_comments
 stale_comments = os.listdir(comment_path)
 for file in stale_comments:
@@ -37,8 +39,13 @@ import threading
 def callback():
     process = subprocess.run(['python', 'play-background-music.py'])
 
-thread = threading.Thread(target=callback)
-thread.start()
+if play_background_music:
+    thread = threading.Thread(target=callback)
+    thread.start()
+
+
+
+
 
 #main loop
 pygame.mixer.init()
@@ -130,6 +137,7 @@ search_array = [
     [['ขนม'], ['บอนนี่_รีวิวบอนนี่']],
     [['แป้ง'], ['บอนนี่_รีวิวบอนนี่']],
     [['เเป้ง'], ['บอนนี่_รีวิวบอนนี่']],
+    [['ลูกคุณหนู'], ['บอนนี่_รีวิวบอนนี่']],
 
     [['oynx'], ['onyx_สำหรับonyx_1','onyx_สำหรับonyx_2']],
     [['onyx'], ['onyx_สำหรับonyx_1','onyx_สำหรับonyx_2']],
@@ -166,7 +174,10 @@ search_array = [
 
     [['กลิ่นใหม่'], ['หนังสือ_รีวิวหนังสือ']],
     [['หนังสือ'], ['หนังสือ_รีวิวหนังสือ']],
+    [['สมุด'], ['หนังสือ_รีวิวหนังสือ']],
+
     [['ใช้','นาน'], ['ใช้นาน_ใช้ได้นาน','ใช้นาน_ใช้ได้นาน2']],
+
 
     [['tender'], ['tender_สำหรับtender_1', 'tender_สำหรับtender_2']],
     [['เทนเดอ'], ['tender_สำหรับtender_1', 'tender_สำหรับtender_2']],
@@ -246,6 +257,7 @@ search_array = [
     [['เเท้'], ['แท้_✅Geniune 3']],
 
     [['กะล่อน'], ['กะล่อน_กลิ่นฟลุ้คกะล่อน']],
+    [['กะร่อน'], ['กะล่อน_กลิ่นฟลุ้คกะล่อน']],
     [['ฟลุ๊ก'], ['กะล่อน_กลิ่นฟลุ้คกะล่อน']],
     [['ฟลุ้ก'], ['กะล่อน_กลิ่นฟลุ้คกะล่อน']],
     [['ฟลุ็ก'], ['กะล่อน_กลิ่นฟลุ้คกะล่อน']],
