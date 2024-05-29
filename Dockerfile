@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=1
 # Install pip requirements
 COPY requirements.txt .
 
-RUN apt-get update && apt-get install -y --no-install-recommends libglib2.0-0
+RUN apt-get update && apt-get install -y --no-install-recommends libglib2.0-0 alsa-utils
 RUN python -m pip install -r requirements.txt
 
 WORKDIR /app
