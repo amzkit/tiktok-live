@@ -70,11 +70,16 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 
+#v202405
+#chat_div = "//div[@class='py-2 px-4 rounded-full bg-brand-hover bg-opacity-[.14] break-words mb-4']"
+#v20240606
+chat_div = "//div[@class='py-2 px-4 rounded-[16px] bg-brand-hover bg-opacity-[.14] break-words mb-4']"
+
 options = webdriver.ChromeOptions()
 options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
+options.add_argument("--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 19")
 options.add_argument(r'--remote-debugging-pipe')
 browser = webdriver.Chrome(options)
-
 #browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
 browser.get('https://seller-th.tiktok.com/compass/live-analysis?shop_region=TH')
 
@@ -368,9 +373,15 @@ def chat(browser, unique_id):
     #print("window", window_index)
     if(live_count > 1):
         switch(unique_id)
-    temp_comments = browser.find_elements(By.XPATH, "//div[@class='py-2 px-4 rounded-full bg-brand-hover bg-opacity-[.14] break-words mb-4']")
+
+    #print("[Chat] Checking new chat")
+    temp_comments = browser.find_elements(By.XPATH, chat_div)
     unique_id = lives[unique_id]['unique_id']
+    #if len(temp_comments):
+    #    print("[Chat] Found", len(temp_comments), "chat(s)" )
+    #
     for i in range(len(temp_comments)):
+        #print('[Chat]['+lives[unique_id]['unique_id']+'] '+ temp_comments[i].text)
         notify(lives[unique_id]['unique_id'], temp_comments[i].text)
         user = temp_comments[i].text.split(':')[0]
         comment = ' '.join(temp_comments[i].text.split(':')[1:])
@@ -490,31 +501,32 @@ while True:
     #
     #print("[Product] check time to pin")
     
-    if(PINNING_ENABLED and time_to_pin(last_pin_time_epoch)):
-        try:
-            for unique_id in unique_ids:
-                #print("[LOOP][UniqueID]", unique_id)
-                product_key = next_product_key_to_pin(unique_id)
-                #print("[LOOP][UniqueID][product_key]", product_key)
-                #print('Product_key', product_key)
+    if PINNING_ENABLED:
+        if time_to_pin(last_pin_time_epoch):
+            try:
+                for unique_id in unique_ids:
+                    #print("[LOOP][UniqueID]", unique_id)
+                    product_key = next_product_key_to_pin(unique_id)
+                    #print("[LOOP][UniqueID][product_key]", product_key)
+                    #print('Product_key', product_key)
+                    switch(unique_id)
+                    if product_key != '':
+                        try:
+                            products_temp = lives[unique_id]['products']
+                            browser.execute_script("arguments[0].scrollIntoView();", lives[unique_id]['products'][product_key])
+                            lives[unique_id]['products'][product_key].click()
+                        except:
+                            print('['+time.strftime('%H:%M')+']['+str(lives[unique_id]['unique_id'])+"]["+str(product_key)+"] Failed to clicked")
+                            product_initial()
+                            time.sleep(1)
+                            continue
+                    print('['+time.strftime('%H:%M')+']['+str(lives[unique_id]['unique_id'])+"]["+str(product_key)+"] has been pinned")
+                last_pin_time_epoch = int(datetime.datetime.now().timestamp())
+            except:
+                print('['+time.strftime('%H:%M')+'][ERROR] Pinning')
                 switch(unique_id)
-                if product_key != '':
-                    try:
-                        products_temp = lives[unique_id]['products']
-                        browser.execute_script("arguments[0].scrollIntoView();", lives[unique_id]['products'][product_key])
-                        lives[unique_id]['products'][product_key].click()
-                    except:
-                        print('['+time.strftime('%H:%M')+']['+str(lives[unique_id]['unique_id'])+"]["+str(product_key)+"] Failed to clicked")
-                        product_initial()
-                        time.sleep(1)
-                        continue
-                print('['+time.strftime('%H:%M')+']['+str(lives[unique_id]['unique_id'])+"]["+str(product_key)+"] has been pinned")
-            last_pin_time_epoch = int(datetime.datetime.now().timestamp())
-        except:
-            print('['+time.strftime('%H:%M')+'][ERROR] Pinning')
-            switch(unique_id)
-            close_tab(unique_id)
-            open_live_session()
+                close_tab(unique_id)
+                open_live_session()
     #
     #The End of Loop
     time.sleep(1)
