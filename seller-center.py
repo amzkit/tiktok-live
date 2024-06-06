@@ -77,7 +77,7 @@ chat_div = "//div[@class='py-2 px-4 rounded-[16px] bg-brand-hover bg-opacity-[.1
 
 options = webdriver.ChromeOptions()
 options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
-options.add_argument("--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 19")
+#options.add_argument("--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 19")
 options.add_argument(r'--remote-debugging-pipe')
 browser = webdriver.Chrome(options)
 #browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
