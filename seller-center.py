@@ -126,6 +126,9 @@ def live_session_tab():
             break
     if(live_tab != None):
         live_tab.click()
+        
+
+x = browser.find_elements(By.XPATH, '//div[@class="index-wrapper--PCIIh"]')
 
 # find in a link to live session "ไลฟ์บอร์ด"
 live_count = 0
@@ -321,7 +324,8 @@ def next_product_key_to_pin(unique_id):
     #print('Next product :', lives[unique_id]['product_key_to_pin'])
     return next_product_key
 
-product_initial()
+if PINNING_ENABLED:
+    product_initial()
 #print("Product Initialized", lives[0]['products'])
 ################################################################
 
@@ -485,6 +489,7 @@ while True:
     ##################################
     #
     #print("[Product] check time to pin")
+    
     if(PINNING_ENABLED and time_to_pin(last_pin_time_epoch)):
         try:
             for unique_id in unique_ids:
