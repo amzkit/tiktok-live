@@ -486,7 +486,8 @@ while(True):
                 speech_filename = speech
 
                 try:
-                    pygame.mixer.Channel(0).pause()
+                    #pygame.mixer.Channel(0).pause()
+                    pygame.mixer.Channel(0).stop()
                     reply_file = -1
 
                     q = pygame.mixer.Sound(os.path.join(comment_path, speech_filename))
@@ -523,8 +524,8 @@ while(True):
                         if not os.path.exists(os.path.join(reply_path, reply_file)):
                             print("[ERROR] Missing reply file", reply_file)
                             os.remove(os.path.join(comment_path, speech_filename))
-                            print('['+time.strftime('%H:%M')+'][Main] : resume ' + clips[i])
-                            pygame.mixer.Channel(0).unpause()
+                            #print('['+time.strftime('%H:%M')+'][Main] : resume ' + clips[i])
+                            #pygame.mixer.Channel(0).unpause()
                             continue
 
                         reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
@@ -540,8 +541,8 @@ while(True):
                         print('['+time.strftime('%H:%M')+'][NO REPLY]')
                         r = requests.post(url, headers=headers, data = {'message': 'ไม่มีคำตอบสำหรับ ' + speech})
   
-                    print('['+time.strftime('%H:%M')+'][Loop] resume ' + clips[i])
-                    pygame.mixer.Channel(0).unpause()
+                    #print('['+time.strftime('%H:%M')+'][Loop] resume ' + clips[i])
+                    #pygame.mixer.Channel(0).unpause()
 
                     time.sleep(1)
                     os.remove(os.path.join(comment_path, speech_filename))

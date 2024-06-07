@@ -16,7 +16,7 @@ threads_sleep_time = []
 
 for temp in range(len(uids)):
     threads.append([])
-    threads_sleep_time.append(2)
+    threads_sleep_time.append(5)
 
 while True:
     for i in range(len(uids)):
@@ -27,13 +27,16 @@ while True:
             threads[i] = threading.Thread(target=callback, args=[uid, token])
             threads[i].start()
             #print('[xxx]', type(threads[i]))
-
-            threads_sleep_time[i] = threads_sleep_time[i] * 2
-            if(threads_sleep_time[i] > 900):
-                threads_sleep_time[i] = 900
+            if(threads_sleep_time[i] < 30):
+                threads_sleep_time[i] = 30
+            else:
+                threads_sleep_time[i] = threads_sleep_time[i] * 2
+            if(threads_sleep_time[i] > 3600):
+                threads_sleep_time[i] = 3600
 
         elif type(threads[i]) == threading.Thread:
             if not threads[i].is_alive():
+                print("[ATTENTION]", uid, "Disconnected")
                 threads[i] = []
     time.sleep(2)
     #process = subprocess.run(['python', 'tiktok-client.py', account[0], account[1]])

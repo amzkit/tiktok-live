@@ -24,6 +24,7 @@ headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'B
 #Tiktok Account
 
 # Create the client
+print('['+time.strftime('%H:%M')+']['+uid+'] Connecting')
 client: TikTokLiveClient = TikTokLiveClient(unique_id=uid)
 
 

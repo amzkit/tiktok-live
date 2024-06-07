@@ -76,9 +76,14 @@ from selenium.webdriver.common.action_chains import ActionChains
 chat_div = "//div[@class='py-2 px-4 rounded-[16px] bg-brand-hover bg-opacity-[.14] break-words mb-4']"
 
 options = webdriver.ChromeOptions()
-options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
-#options.add_argument("--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 19")
+if 'USER_PROFILE' in locals():
+    options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
+else:
+    options.add_argument("--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 19")
 options.add_argument(r'--remote-debugging-pipe')
+options.add_argument("--disable-blink-features=AutomationControlled") 
+options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
+options.add_experimental_option("useAutomationExtension", False) 
 browser = webdriver.Chrome(options)
 #browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
 browser.get('https://seller-th.tiktok.com/compass/live-analysis?shop_region=TH')
