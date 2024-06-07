@@ -1,3 +1,5 @@
+AUTO_COMMENT = False
+
 import time
 import sys
 import random
@@ -28,6 +30,10 @@ div_chat_message = "//div[contains(@class, 'DivChatMessage')]"
 div_user_info = "//div[contains(@class, 'DivUserInfo')]"
 div_comment = "//div[contains(@class, 'DivComment')]"
 
+# To check if connected, if there like container = ok, else click on retry
+div_like_container = "//div[contains(@class, 'DivLikeContainer')]"
+retry_button = "//Button[contains(text(),'Retry')]"
+
 # Insert Chat
 div_input_editor_container = "//div[contains(@class, 'DivInputEditorContainer')]"
 content_editable = "//div[@contenteditable='plaintext-only']"
@@ -36,7 +42,9 @@ comment_list = [
     'แนะนำกลิ่น passion love หน่อยค่ะ','กลิ่น dreamy cloud หน่อยค่ะ',
     'แนะนำ kiss me more หน่อยค่ะ', 'ขอกลิ่น mine wish หน่อยค่ะ',
     'แนะนำกลิ่นสำหรับผู้ชายหน่อยค่ะ','กลิ่นสดชื่นๆ',
-    'กลิ่นสะอาดๆกลิ่นไหนคะ', 'กลิ่นหวานๆ หน่อยค่ะ'
+    'ไปเที่ยวกลางคืนกลิ่นไหนดีคะ', 'กลิ่นหวานๆ หน่อยค่ะ'
+    'ปิคนิค','woodsand','ไปทะเลกลิ่นไหน','มีกลิ่นคล้ายเค้าเตอร์แบรนด์ไหมคะ',
+    'ส่งวันไหน',
 ]
 
 
@@ -51,22 +59,30 @@ options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
 options.add_experimental_option("useAutomationExtension", False) 
 browser = webdriver.Chrome(options)
-time.sleep(5)
 
 #browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
 browser.get('https://tiktok.com/@byprw_official/live')
-time.sleep(5)
+
+
+#Check if connected
+while True:
+    try:
+        DivLikeContainer = WebDriverWait(browser, 60).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_like_container)))
+        break
+    except:
+        RetryButton = browser.find_elements(By.XPATH, retry_button)
+        if len(RetryButton) > 0:
+            RetryButton[0].click()
 
 def removeElement(element):
     browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", element)
-
 
 #DivHeaderContainer = browser.find_elements(By.XPATH, div_header_container)
 #removeElement(DivHeaderContainer)
 DivSideNavContainer = browser.find_elements(By.XPATH, div_side_nav_container)
 removeElement(DivSideNavContainer[0])
-DidLiveContent = browser.find_elements(By.XPATH, div_live_content)
-removeElement(DidLiveContent[1])
+DivLiveContent = browser.find_elements(By.XPATH, div_live_content)
+removeElement(DivLiveContent[1])
 
 
 #   Input Text
@@ -75,11 +91,11 @@ removeElement(DidLiveContent[1])
 last_comment_time_epoch = 0
 def time_to_comment(last_comment_time_epoch):
     now_epoch = int(datetime.datetime.now().timestamp())
-    next_pin_epoch = last_comment_time_epoch + (int(random.random()*1000)) % 300 + 1
-        if(next_pin_epoch < now_epoch):
-            return True
-        else:
-            return False
+    next_pin_epoch = last_comment_time_epoch + (int(random.random()*1000)) % 300 + 300
+    if(next_pin_epoch < now_epoch):
+        return True
+    else:
+        return False
 
 last_index = -1
 chat_count = 0
@@ -101,18 +117,18 @@ while True:
         last_index = last_index + 1
         #print("Last Index :" , last_index)
     #
-    if time_to_comment(last_comment_time_epoch):
-        if(len(comment_left) == 0):
-            comment_left = comment_list
-        pick_index = (random.random() * 100) % len(comment_left)
-        to_comment = comment_left.pop(int(pick_index))
-
-        #
-        ContentEditable = browser.find_element(By.XPATH, content_editable)
-        ContentEditable.send_keys(to_comment)
-        ContentEditable.send_keys(Keys.RETURN)
+    if AUTO_COMMENT == True and time_to_comment(last_comment_time_epoch):
         try:
-            a = 0
+            if(len(comment_left) == 0):
+                comment_left = comment_list
+            pick_index = (random.random() * 100) % len(comment_left)
+            to_comment = comment_left.pop(int(pick_index))
+
+            #
+            ContentEditable = browser.find_element(By.XPATH, content_editable)
+            ContentEditable.send_keys(to_comment)
+            ContentEditable.send_keys(Keys.RETURN)
+            last_comment_time_epoch = int(datetime.datetime.now().timestamp())
         except:
             print('['+time.strftime('%H:%M')+'] cannot comment')
     #
