@@ -16,8 +16,8 @@ UIDS = json.loads(os.getenv('LIVE_CHAT_IDS', 'True').replace('\n', '').replace('
 #]
 
 def callback(uid, token):
-    print("[Execute] python", '2-chat.py', uid, token)
-    process = subprocess.run(['python', '2-chat.py', uid, token])
+    print("[Execute] python", '4-web-live-chat.py', uid, token)
+    process = subprocess.run(['python', '4-web-live-chat.py', uid, token])
 
 threads = []
 threads_sleep_time = []

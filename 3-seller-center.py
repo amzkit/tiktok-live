@@ -6,10 +6,11 @@ import threading
 import json
 from queue import Queue
 from dotenv import load_dotenv
+load_dotenv()
+
 import os
 from distutils.util import strtobool
 
-load_dotenv()
 
 id = sys.argv[1]
 #id = 0
@@ -129,11 +130,15 @@ def close_tab(unique_id):
 # click on going on live session tab "ไลฟ์ที่กำลังดำเนินอยู่"
 def live_session_tab():
     live_tab = None
-    live_tabs = browser.find_elements(By.XPATH, '//div[@class="inline-flex items-center"]/div[1]')
-    for i in range(len(live_tabs)):
-        if('ไล' in live_tabs[i].text):
-            live_tab = live_tabs[i]
-            break
+    div_live_session_tab = '//div[@class="inline-flex items-center"]/div[contains(text(),"ไลฟ์ที่กำลังดำเนินอยู่")]'
+    WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_live_session_tab)))
+    live_tabs = browser.find_elements(By.XPATH, div_live_session_tab)
+    if len(live_tabs) == 1:
+        live_tab = live_tabs[0]
+    #for i in range(len(live_tabs)):
+    #    if('ไล' in live_tabs[i].text):
+    #        live_tab = live_tabs[i]
+    #        break
     if(live_tab != None):
         live_tab.click()
         

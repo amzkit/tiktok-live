@@ -1,9 +1,20 @@
-AUTO_COMMENT = False
-
 import time
 import sys
 import random
 import datetime
+import sys
+
+HEADLESS = False
+AUTO_COMMENT = False
+
+import json
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+TOKEN = json.loads(os.getenv('TOKEN', 'True').replace('\n', '').replace('\\',''))
+UIDS = json.loads(os.getenv('LIVE_CHAT_IDS', 'True').replace('\n', '').replace('\\','').replace(' ',''))
+USER_PROFILE = os.getenv('USER_PROFILE_0', 'True')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -26,13 +37,16 @@ div_live_content = "//div[contains(@class, 'DivLiveContent')]"
 
 # Chat Element
 div_chat_message_list = "//div[contains(@class, 'DivChatMessageList')]"
-div_chat_message = "//div[contains(@class, 'DivChatMessage')]"
+div_chat_message = "//div[contains(@class,'DivChatMessageList')]/div[contains(@class, 'DivChatMessage')]"
 div_user_info = "//div[contains(@class, 'DivUserInfo')]"
 div_comment = "//div[contains(@class, 'DivComment')]"
 
-# To check if connected, if there like container = ok, else click on retry
+# To check if connected, method 1: if there like container = ok, else click on retry
 div_like_container = "//div[contains(@class, 'DivLikeContainer')]"
 retry_button = "//Button[contains(text(),'Retry')]"
+
+# To check if connected, method 2: check DivContent (there will be message 'username joined')
+div_content = "//div[contains(@class,'DivContent')]"
 
 # Insert Chat
 div_input_editor_container = "//div[contains(@class, 'DivInputEditorContainer')]"
@@ -46,96 +60,110 @@ comment_list = [
     'ปิคนิค','woodsand','ไปทะเลกลิ่นไหน','มีกลิ่นคล้ายเค้าเตอร์แบรนด์ไหมคะ',
     'ส่งวันไหน',
 ]
-
+lives = {}
 
 options = webdriver.ChromeOptions()
 if 'USER_PROFILE' in locals():
     options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
 else:
-    options.add_argument("--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 19")
+    options.add_argument("--user-data-dir=C:\\Users\\Kit\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 21")
 options.add_argument(r'--remote-debugging-pipe')
+
 options.add_argument("--disable-blink-features=AutomationControlled")
-#options.add_argument("--headless=new")
+if HEADLESS:
+    options.add_argument("--headless=new")
+######################
+# Attempt to disable error stun.l.google.com message
+#options.add_argument(r'--disable-logging')
+#options.add_argument(r'--allow-running-insecure-content')
+#options.add_argument(r'--ignore-certificate-errors')
+######################
 options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
 options.add_experimental_option("useAutomationExtension", False) 
+
 browser = webdriver.Chrome(options)
 
 #browser.get('https://seller-th.tiktok.com/account/login?shop_region=TH')
-browser.get('https://tiktok.com/@byprw_official/live')
-
-
-#Check if connected
-while True:
-    try:
-        DivLikeContainer = WebDriverWait(browser, 60).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_like_container)))
-        break
-    except:
-        RetryButton = browser.find_elements(By.XPATH, retry_button)
-        if len(RetryButton) > 0:
-            RetryButton[0].click()
 
 def removeElement(element):
     browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", element)
 
-#DivHeaderContainer = browser.find_elements(By.XPATH, div_header_container)
-#removeElement(DivHeaderContainer)
-DivSideNavContainer = browser.find_elements(By.XPATH, div_side_nav_container)
-removeElement(DivSideNavContainer[0])
-DivLiveContent = browser.find_elements(By.XPATH, div_live_content)
-removeElement(DivLiveContent[1])
 
+def switch(unique_id):
+    browser.switch_to.window(lives[unique_id]['window_id'])
 
-#   Input Text
-# DivInputEditorContainer = browser.find_element(By.XPATH, div_input_editor_container)
-
-last_comment_time_epoch = 0
-def time_to_comment(last_comment_time_epoch):
+def reconnect(unique_id):
+    switch(unique_id)
     now_epoch = int(datetime.datetime.now().timestamp())
-    next_pin_epoch = last_comment_time_epoch + (int(random.random()*1000)) % 300 + 300
-    if(next_pin_epoch < now_epoch):
-        return True
-    else:
-        return False
+    reconnect_epoch = lives[unique_id]['last_connected_epoch_time'] + lives[unique_id]['waiting_until_reconnect']
+    if(reconnect_epoch < now_epoch):
+        print('['+time.strftime('%H:%M')+']['+unique_id+'] Reconnecting...')
+        browser.get('https://tiktok.com/@'+unique_id+'/live')
+        #
+        DivSideNavContainer = WebDriverWait(browser, 60).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_side_nav_container)))
+        #DivSideNavContainer = browser.find_elements(By.XPATH, div_side_nav_container)
+        removeElement(DivSideNavContainer)
+        DivLiveContent = browser.find_elements(By.XPATH, div_live_content)
+        removeElement(DivLiveContent[1])
+        print('['+time.strftime('%H:%M')+']['+unique_id+'] Connected')
 
-last_index = -1
-chat_count = 0
+        lives[unique_id]['shown_connection_error'] = True
 
-
-comment_left = comment_list
-while True:
-    DivChatMessage = browser.find_elements(By.XPATH, div_chat_message)
-    chat_count = len(DivChatMessage)
-    #print("Count:", chat_count)
+for i in range(len(UIDS)):
+    uid = UIDS[i]
+    if i > 0:
+        browser.switch_to.new_window('tab')
+    print('['+time.strftime('%H:%M')+']['+uid+'] Connecting')
+    browser.get('https://tiktok.com/@'+uid+'/live')
     #
-    if(chat_count > last_index):
-        user = DivChatMessage[last_index-1].find_elements(By.XPATH, div_user_info)
-        user = user[last_index-1].text
-        comment = DivChatMessage[last_index-1].find_elements(By.XPATH, div_comment)
-        comment = comment[last_index-1].text
-        #print(user, comment)
-        print('['+time.strftime('%H:%M')+']['+user+"] " + comment)
-        last_index = last_index + 1
-        #print("Last Index :" , last_index)
+    DivSideNavContainer = WebDriverWait(browser, 60).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_side_nav_container)))
+    #DivSideNavContainer = browser.find_elements(By.XPATH, div_side_nav_container)
+    removeElement(DivSideNavContainer)
+    DivLiveContent = browser.find_elements(By.XPATH, div_live_content)
+    removeElement(DivLiveContent[1])
     #
-    if AUTO_COMMENT == True and time_to_comment(last_comment_time_epoch):
-        try:
-            if(len(comment_left) == 0):
-                comment_left = comment_list
-            pick_index = (random.random() * 100) % len(comment_left)
-            to_comment = comment_left.pop(int(pick_index))
-
-            #
-            ContentEditable = browser.find_element(By.XPATH, content_editable)
-            ContentEditable.send_keys(to_comment)
-            ContentEditable.send_keys(Keys.RETURN)
-            last_comment_time_epoch = int(datetime.datetime.now().timestamp())
-        except:
-            print('['+time.strftime('%H:%M')+'] cannot comment')
-    #
-    #   
-    #if len(temp_comments):
-    #    print("[Chat] Found", len(temp_comments), "chat(s)" )
-    #
+    lives[uid] = {
+        'window_id': browser.window_handles[i],
+        'next_index': 0,
+        'chat_count': 0,
+        'last_connected_epoch_time': int(datetime.datetime.now().timestamp()),
+        'waiting_until_reconnect': 1500,
+        'shown_connection_error': False,
+    }
+    print('['+time.strftime('%H:%M')+']['+uid+'] Connected')
     time.sleep(1)
+
+while True:
+    for i in range(len(UIDS)):
+        uid = UIDS[i]
+        if(len(UIDS) > 1):
+            switch(uid)
+        #
+        try:
+            DivChatMessage = browser.find_elements(By.XPATH, div_chat_message)
+            lives[uid]['chat_count'] = len(DivChatMessage)
+            #print("Count:", chat_count)
+            #
+            if(lives[uid]['chat_count'] > lives[uid]['next_index']):
+                user = DivChatMessage[lives[uid]['next_index']].find_elements(By.XPATH, div_user_info)
+                user = user[lives[uid]['next_index']].text
+                comment = DivChatMessage[lives[uid]['next_index']].find_elements(By.XPATH, div_comment)
+                comment = comment[lives[uid]['next_index']].text
+                #print(user, comment)
+                print('['+time.strftime('%H:%M')+']['+uid+']['+user+"] " + comment)
+                lives[uid]['next_index'] = lives[uid]['next_index'] + 1
+                #print("Last Index :" , last_index)
+            #   
+            #if len(temp_comments):
+            #    print("[Chat] Found", len(temp_comments), "chat(s)" )
+            #
+        except:
+            # ERROR remove from the list
+            if(lives[uid]['shown_connection_error'] == False):
+                print('['+time.strftime('%H:%M')+']['+uid+'] ERROR')
+                lives[uid]['shown_connection_error'] = True
+            reconnect(uid)
+        #
+        time.sleep(1)
 
 

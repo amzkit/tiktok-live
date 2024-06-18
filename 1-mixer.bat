@@ -1,2 +1,2 @@
 git pull
-python 1-mixer.py
+python 1-mixer-manager.py
