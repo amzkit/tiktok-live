@@ -7,6 +7,13 @@ import sys
 HEADLESS = False
 AUTO_COMMENT = False
 
+#GTTS Speech
+from gtts import gTTS
+from io import BytesIO
+
+#Line Notify
+import requests
+
 import json
 import os
 from dotenv import load_dotenv
@@ -15,6 +22,7 @@ load_dotenv()
 TOKEN = json.loads(os.getenv('TOKEN', 'True').replace('\n', '').replace('\\',''))
 UIDS = json.loads(os.getenv('LIVE_CHAT_IDS', 'True').replace('\n', '').replace('\\','').replace(' ',''))
 USER_PROFILE = os.getenv('USER_PROFILE_0', 'True')
+LINE_NOTIFY_URL = os.getenv('LINE_NOTIFY_URL')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -88,7 +96,6 @@ browser = webdriver.Chrome(options)
 def removeElement(element):
     browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", element)
 
-
 def switch(unique_id):
     browser.switch_to.window(lives[unique_id]['window_id'])
 
@@ -108,6 +115,22 @@ def reconnect(unique_id):
         print('['+time.strftime('%H:%M')+']['+unique_id+'] Connected')
 
         lives[unique_id]['shown_connection_error'] = True
+
+def notify(unique_id, message):
+    headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer ' + TOKEN[unique_id]}
+    r = requests.post(LINE_NOTIFY_URL, headers=headers, data = {'message':message})
+
+def siri(unique_id, user, comment):
+    #print('['+time.strftime('%H:%M')+']['+unique_id+'][Comment] ' + user + ' : ' + comment)
+    message = user + ':' + comment
+    notify(unique_id, message)
+
+    if len(comment) > 0 and comment[0] == "@" and len(comment.split()) > 1:
+        comment = comment.split()[1:]
+        comment = ' '.join(comment) 
+    tts = gTTS(comment, lang='th')
+    filename = str(int(time.time())) + '_' + comment
+    tts.save(os.path.join('comment', filename +'.ogg'))
 
 for i in range(len(UIDS)):
     uid = UIDS[i]
@@ -151,6 +174,7 @@ while True:
                 comment = comment[lives[uid]['next_index']].text
                 #print(user, comment)
                 print('['+time.strftime('%H:%M')+']['+uid+']['+user+"] " + comment)
+                siri(uid, user, comment)
                 lives[uid]['next_index'] = lives[uid]['next_index'] + 1
                 #print("Last Index :" , last_index)
             #   
