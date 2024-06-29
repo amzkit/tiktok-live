@@ -113,7 +113,7 @@ def reconnect(unique_id):
         DivLiveContent = browser.find_elements(By.XPATH, div_live_content)
         removeElement(DivLiveContent[1])
         print('['+time.strftime('%H:%M')+']['+unique_id+'] Connected')
-
+        #
         lives[unique_id]['shown_connection_error'] = True
 
 def notify(unique_id, message):
@@ -124,13 +124,17 @@ def siri(unique_id, user, comment):
     #print('['+time.strftime('%H:%M')+']['+unique_id+'][Comment] ' + user + ' : ' + comment)
     message = user + ':' + comment
     notify(unique_id, message)
-
+    #
     if len(comment) > 0 and comment[0] == "@" and len(comment.split()) > 1:
         comment = comment.split()[1:]
-        comment = ' '.join(comment) 
-    tts = gTTS(comment, lang='th')
-    filename = str(int(time.time())) + '_' + comment
-    tts.save(os.path.join('comment', filename +'.ogg'))
+        comment = ' '.join(comment)
+    try:
+        tts = gTTS(comment, lang='th')
+        filename = str(int(time.time())) + '_' + comment
+        tts.save(os.path.join('comment', filename +'.ogg'))
+    except:
+        print('['+time.strftime('%H:%M')+']['+uid+'][Error] gtts')
+        lives[uid]['shown_connection_error'] = True
 
 for i in range(len(UIDS)):
     uid = UIDS[i]
@@ -174,7 +178,8 @@ while True:
                 comment = comment[lives[uid]['next_index']].text
                 #print(user, comment)
                 print('['+time.strftime('%H:%M')+']['+uid+']['+user+"] " + comment)
-                siri(uid, user, comment)
+                if(comment != ''):
+                    siri(uid, user, comment)
                 lives[uid]['next_index'] = lives[uid]['next_index'] + 1
                 #print("Last Index :" , last_index)
             #   
