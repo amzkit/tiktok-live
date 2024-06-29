@@ -45,7 +45,9 @@ div_live_content = "//div[contains(@class, 'DivLiveContent')]"
 
 # Chat Element
 div_chat_message_list = "//div[contains(@class, 'DivChatMessageList')]"
-div_chat_message = "//div[contains(@class,'DivChatMessageList')]/div[contains(@class, 'DivChatMessage')]"
+#div_chat_message = "//div[contains(@class,'DivChatMessageList')]/div[contains(@class, 'DivChatMessage')]"
+
+div_chat_messages = "//div[@data-e2e='chat-message']"
 div_user_info = "//div[contains(@class, 'DivUserInfo')]"
 div_comment = "//div[contains(@class, 'DivComment')]"
 
@@ -167,14 +169,14 @@ while True:
             switch(uid)
         #
         try:
-            DivChatMessage = browser.find_elements(By.XPATH, div_chat_message)
-            lives[uid]['chat_count'] = len(DivChatMessage)
+            DivChatMessages = browser.find_elements(By.XPATH, div_chat_messages)
+            lives[uid]['chat_count'] = len(DivChatMessages)
             #print("Count:", chat_count)
             #
             if(lives[uid]['chat_count'] > lives[uid]['next_index']):
-                user = DivChatMessage[lives[uid]['next_index']].find_elements(By.XPATH, div_user_info)
+                user = DivChatMessages[lives[uid]['next_index']].find_elements(By.XPATH, div_user_info)
                 user = user[lives[uid]['next_index']].text
-                comment = DivChatMessage[lives[uid]['next_index']].find_elements(By.XPATH, div_comment)
+                comment = DivChatMessages[lives[uid]['next_index']].find_elements(By.XPATH, div_comment)
                 comment = comment[lives[uid]['next_index']].text
                 #print(user, comment)
                 print('['+time.strftime('%H:%M')+']['+uid+']['+user+"] " + comment)
