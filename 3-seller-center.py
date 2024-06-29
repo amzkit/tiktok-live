@@ -131,7 +131,7 @@ def close_tab(unique_id):
 def live_session_tab():
     live_tab = None
     div_live_session_tab = '//div[@class="inline-flex items-center"]/div[contains(text(),"ไลฟ์ที่กำลังดำเนินอยู่")]'
-    WebDriverWait(browser, 30).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_live_session_tab)))
+    WebDriverWait(browser, 600).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_live_session_tab)))
     live_tabs = browser.find_elements(By.XPATH, div_live_session_tab)
     if len(live_tabs) == 1:
         live_tab = live_tabs[0]
