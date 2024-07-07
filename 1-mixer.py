@@ -632,7 +632,11 @@ while(True):
                     #print("[TRY] searching for done", reply_file)
 
                     if(reply_file != -1):
-                        r = requests.post(url, headers=headers, data = {'message': 'ตอบกลับ ' + reply_file})
+                        try:
+                            r = requests.post(url, headers=headers, data = {'message': 'ตอบกลับ ' + reply_file})
+                        except:
+                            print('['+time.strftime('%H:%M')+'][ERROR] Line Notify ERROR')
+
                         reply_file = reply_file + sound_ext
                         #print("[TRY] reply with ", reply_file)
 
