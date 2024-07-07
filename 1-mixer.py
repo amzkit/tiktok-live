@@ -35,7 +35,11 @@ for file in stale_comments:
         os.remove(os.path.join(comment_path, file))
     except:
         print('['+time.strftime('%H:%M')+'][FATAL ERROR] ลบไฟล์เก่าไม่ได้ ' + file)
-        r = requests.post(url, headers=headers, data = {'message': 'มีไฟล์ที่ลบไม่ได้ '+file})
+        try:
+            r = requests.post(url, headers=headers, data = {'message': 'มีไฟล์ที่ลบไม่ได้ '+file})
+        except:
+            print('['+time.strftime('%H:%M')+'][FATAL ERROR] Line Notify Error: (Remove Stale)')
+
         time.sleep(10)
 
 #play blackground music

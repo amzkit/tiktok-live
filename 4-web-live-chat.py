@@ -120,7 +120,10 @@ def reconnect(unique_id):
 
 def notify(unique_id, message):
     headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer ' + TOKEN[unique_id]}
-    r = requests.post(LINE_NOTIFY_URL, headers=headers, data = {'message':message})
+    try:
+        r = requests.post(LINE_NOTIFY_URL, headers=headers, data = {'message':message})
+    except:
+        print('['+time.strftime('%H:%M')+'][ERROR] Line Notify Error')
 
 def siri(unique_id, user, comment):
     #print('['+time.strftime('%H:%M')+']['+unique_id+'][Comment] ' + user + ' : ' + comment)
