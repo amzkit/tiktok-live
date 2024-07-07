@@ -194,12 +194,12 @@ search_array = [
     [['หวาน', 'คับ'], ['tender_ตอบ เทนเดอร์']],
     [['หวาน', 'ผช'], ['tender_ตอบ เทนเดอร์']],
 
-    [['สะอาด', 'ผญ'], ['woodsand_ตอบ วู้ดแซน']],
-    [['สะอาด', 'คะ'], ['woodsand_ตอบ วู้ดแซน']],
-    [['สะอาด', 'ค่ะ'], ['woodsand_ตอบ วู้ดแซน']],
-    [['อาบน้ำ', 'ผญ'], ['woodsand_ตอบ วู้ดแซน']],
-    [['อาบน้ำ', 'คะ'], ['woodsand_ตอบ วู้ดแซน']],
-    [['อาบน้ำ'], ['woodsand_ตอบ วู้ดแซน']],
+    [['สะอาด', 'ผญ'], ['woodsand_ตอบ']],
+    [['สะอาด', 'คะ'], ['woodsand_ตอบ']],
+    [['สะอาด', 'ค่ะ'], ['woodsand_ตอบ']],
+    [['อาบน้ำ', 'ผญ'], ['woodsand_ตอบ']],
+    [['อาบน้ำ', 'คะ'], ['woodsand_ตอบ']],
+    [['อาบน้ำ'], ['woodsand_ตอบ']],
     [['ละมุน', 'ผช'], ['tender_ตอบ เทนเดอร์']],
     [['ลมุน', 'ผช'], ['tender_ตอบ เทนเดอร์']],
     [['ละมุน', 'ผู้ชาย'], ['tender_ตอบ เทนเดอร์']],
@@ -238,16 +238,16 @@ search_array = [
     [['ออนิก'], ['onyx_สำหรับonyx_1','onyx_สำหรับonyx_2']],
     [['ออนิค'], ['onyx_สำหรับonyx_1','onyx_สำหรับonyx_2']],
 
-    [['wood'], ['woodsand_ตอบ วู้ดแซน']],
-    [['วูด'], ['woodsand_ตอบ วู้ดแซน']], 
-    [['วู้ด'], ['woodsand_ตอบ วู้ดแซน']],
-    [['วุด'], ['woodsand_ตอบ วู้ดแซน']], 
-    [['วู๊ด'], ['woodsand_ตอบ วู้ดแซน']], 
-    [['วู๊ด'], ['woodsand_ตอบ วู้ดแซน']], 
-    [['แซน'], ['woodsand_ตอบ วู้ดแซน']], 
-    [['ธรรมชาติ'], ['woodsand_ตอบ วู้ดแซน']], 
-    [['สาว','หล่อ'], ['woodsand_ตอบ วู้ดแซน']], 
-    [['สาว','เท่'], ['woodsand_ตอบ วู้ดแซน']], 
+    [['wood'], ['woodsand_ตอบ']],
+    [['วูด'], ['woodsand_ตอบ']], 
+    [['วู้ด'], ['woodsand_ตอบ']],
+    [['วุด'], ['woodsand_ตอบ']], 
+    [['วู๊ด'], ['woodsand_ตอบ']], 
+    [['วู๊ด'], ['woodsand_ตอบ']], 
+    [['แซน'], ['woodsand_ตอบ']], 
+    [['ธรรมชาติ'], ['woodsand_ตอบ']], 
+    [['สาว','หล่อ'], ['woodsand_ตอบ']], 
+    [['สาว','เท่'], ['woodsand_ตอบ']], 
 
 
     [['sweetie'], ['picnic_ตอบ สวีทตี้ปิคนิค']],
@@ -605,12 +605,24 @@ while(True):
                 #pygame.mixer.Channel(0).pause()
                 pygame.mixer.Channel(0).stop()
                 reply_file = -1
+
+                #Playing Chat
                 try:
                     q = pygame.mixer.Sound(os.path.join(comment_path, speech_filename))
                     print('['+time.strftime('%H:%M')+'][Chat] ' + speech_filename + ' [' + str(int(q.get_length())) + 's]')
                     pygame.mixer.Channel(1).play(q)
+                    while pygame.mixer.Channel(1).get_busy():
+                        time.sleep(1)
                 except:
-                    print('['+time.strftime('%H:%M')+'][ERROR] Reading file error', speech_filename)
+                    print('['+time.strftime('%H:%M')+'][ERROR] Playing chat error', speech_filename)
+                    #!!!! DANGEROUS IF ERROR AND CANNOT REMOVE FILE
+
+                #Removing Chat
+                try:
+                    os.remove(os.path.join(comment_path, speech_filename))
+                except:
+                    print('['+time.strftime('%H:%M')+'][ERROR] Remove chat error', speech_filename)
+                    continue
 
                 try:
                     #q = pygame.mixer.Sound('comment\\'+speech)
@@ -620,9 +632,6 @@ while(True):
                     speech = speech.split("_")[1:]
                     speech = '_'.join(speech)
 
-                    while pygame.mixer.Channel(1).get_busy():
-                        time.sleep(1)
-                    
                     #print("[TRY] playing comment done")
                     for search in search_array:
                         found_all = True
@@ -644,21 +653,22 @@ while(True):
                         reply_file = reply_file + sound_ext
                         #print("[TRY] reply with ", reply_file)
 
+                        #if there is no reply file, skip
                         if not os.path.exists(os.path.join(reply_path, reply_file)):
                             print("[ERROR] Missing reply file", reply_file)
-                            os.remove(os.path.join(comment_path, speech_filename))
-                            #print('['+time.strftime('%H:%M')+'][Main] : resume ' + clips[i])
-                            #pygame.mixer.Channel(0).unpause()
                             continue
 
-                        reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
+                        #Playing Reply file
+                        try:
+                            reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
+                            print('['+time.strftime('%H:%M')+'][Reply] play ' + reply_file + ' [' + str(int(reply.get_length())) + 's]')
+                            pygame.mixer.Channel(1).play(reply)
+                            while pygame.mixer.Channel(1).get_busy():
+                                time.sleep(1)
+                        except:
+                            print('['+time.strftime('%H:%M')+'][ERROR] Playing Reply File', reply_file)
+                            continue
 
-                        print('['+time.strftime('%H:%M')+'][Reply] play ' + reply_file + ' [' + str(int(reply.get_length())) + 's]')
-                        #reply.set_volume(main_volume)
-                        pygame.mixer.Channel(1).play(reply)
-                        
-                        while pygame.mixer.Channel(1).get_busy():
-                            time.sleep(1)
                     else:
                         print('['+time.strftime('%H:%M')+'][NO REPLY]')
 
