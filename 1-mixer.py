@@ -598,15 +598,17 @@ while(True):
             for speech in speech_queue:
                 speech_filename = speech
 
+                #pygame.mixer.Channel(0).pause()
+                pygame.mixer.Channel(0).stop()
+                reply_file = -1
                 try:
-                    #pygame.mixer.Channel(0).pause()
-                    pygame.mixer.Channel(0).stop()
-                    reply_file = -1
-
                     q = pygame.mixer.Sound(os.path.join(comment_path, speech_filename))
-
                     print('['+time.strftime('%H:%M')+'][Chat] ' + speech_filename + ' [' + str(int(q.get_length())) + 's]')
                     pygame.mixer.Channel(1).play(q)
+                except:
+                    print('['+time.strftime('%H:%M')+'][ERROR] Reading file error', speech_filename)
+
+                try:
                     #q = pygame.mixer.Sound('comment\\'+speech)
                     #pygame.mixer.pause()
                     #pygame.time.wait(int(q.get_length()*1000))
