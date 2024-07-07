@@ -624,85 +624,65 @@ while(True):
                     print('['+time.strftime('%H:%M')+'][ERROR] Remove chat error', speech_filename)
                     continue
 
-                try:
-                    #q = pygame.mixer.Sound('comment\\'+speech)
-                    #pygame.mixer.pause()
-                    #pygame.time.wait(int(q.get_length()*1000))
-                    #q.play()
-                    speech = speech.split("_")[1:]
-                    speech = '_'.join(speech)
+                #q = pygame.mixer.Sound('comment\\'+speech)
+                #pygame.mixer.pause()
+                #pygame.time.wait(int(q.get_length()*1000))
+                #q.play()
+                speech = speech.split("_")[1:]
+                speech = '_'.join(speech)
 
-                    #print("[TRY] playing comment done")
-                    for search in search_array:
-                        found_all = True
-                        for keyword in search[0]:
-                            if not (keyword in speech.lower()):
-                                found_all = False
-                                break
-                        if found_all:
-                            reply_file = search[1][int(random.random()*100) % len(search[1])]
+                #print("[TRY] playing comment done")
+                for search in search_array:
+                    found_all = True
+                    for keyword in search[0]:
+                        if not (keyword in speech.lower()):
+                            found_all = False
                             break
-                    #print("[TRY] searching for done", reply_file)
+                    if found_all:
+                        reply_file = search[1][int(random.random()*100) % len(search[1])]
+                        break
+                #print("[TRY] searching for done", reply_file)
 
-                    if(reply_file != -1):
-                        try:
-                            r = requests.post(url, headers=headers, data = {'message': 'ตอบกลับ ' + reply_file})
-                        except:
-                            print('['+time.strftime('%H:%M')+'][ERROR] Line Notify ERROR')
+                if(reply_file != -1):
+                    reply_file = reply_file + sound_ext
+                    #print("[TRY] reply with ", reply_file)
 
-                        reply_file = reply_file + sound_ext
-                        #print("[TRY] reply with ", reply_file)
+                    #if there is no reply file, skip
+                    if not os.path.exists(os.path.join(reply_path, reply_file)):
+                        print("[ERROR] Missing reply file", reply_file)
+                        continue
 
-                        #if there is no reply file, skip
-                        if not os.path.exists(os.path.join(reply_path, reply_file)):
-                            print("[ERROR] Missing reply file", reply_file)
-                            continue
-
-                        #Playing Reply file
-                        try:
-                            reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
-                            print('['+time.strftime('%H:%M')+'][Reply] play ' + reply_file + ' [' + str(int(reply.get_length())) + 's]')
-                            pygame.mixer.Channel(1).play(reply)
-                            while pygame.mixer.Channel(1).get_busy():
-                                time.sleep(1)
-                        except:
-                            print('['+time.strftime('%H:%M')+'][ERROR] Playing Reply File', reply_file)
-                            continue
-
-                    else:
-                        print('['+time.strftime('%H:%M')+'][NO REPLY]')
-
-                        #ERROR Remove Speech File and reset reply_file
-                        os.remove(os.path.join(comment_path, speech_filename))
-                        reply_file = -1
-
-                        ##r = requests.post(url, headers=headers, data = {'message': 'ไม่มีคำตอบสำหรับ ' + speech})
-  
-                    #print('['+time.strftime('%H:%M')+'][Loop] resume ' + clips[i])
-                    #pygame.mixer.Channel(0).unpause()
-
-                    time.sleep(1)
-                    os.remove(os.path.join(comment_path, speech_filename))
-
-                except FileNotFoundError:
-                    time.sleep(1)
-
+                    #Playing Reply file
                     try:
-                        if reply_file != -1:
-                            print("[ERROR] FileNotFoundError:", os.path.join(reply_path, reply_file))
-                            ##r = requests.post(url, headers=headers, data = {'message': 'Error: ตรวจสอบว่ามีไฟล์คำตอบจริงไหม ' + reply_file + ' จากคำถาม ' + speech})
-
-                            if os.path.exists(os.path.join(comment_path, speech_filename)):
-                                os.remove(os.path.join(comment_path, speech_filename))
-                                print("[ERROR] The comment file has been removed", speech_filename)
-
-                                #os.rename(os.path.join(comment_path, speech), os.path.join(comment_error_path, speech))
-                                #print("[ERR] The file has been moved to error directory")
+                        reply = pygame.mixer.Sound(os.path.join(reply_path, reply_file))
+                        print('['+time.strftime('%H:%M')+'][Reply] play ' + reply_file + ' [' + str(int(reply.get_length())) + 's]')
+                        pygame.mixer.Channel(1).play(reply)
+                        while pygame.mixer.Channel(1).get_busy():
+                            time.sleep(1)
                     except:
-                        time.sleep(1)
-                        #r = requests.post(url, headers=headers, data = {'message': 'Error: ' + reply_file})
-                    finally:
-                        pygame.mixer.Channel(0).unpause()
+                        print('['+time.strftime('%H:%M')+'][ERROR] Playing Reply File (Possibly no reply file)', reply_file)
+                        continue
+                    
+                    # Notify to Line
+                    try:
+                        r = requests.post(url, headers=headers, data = {'message': 'ตอบกลับ ' + reply_file})
+                    except:
+                        print('['+time.strftime('%H:%M')+'][ERROR] Line Notify ERROR')
+
+                else:
+                    print('['+time.strftime('%H:%M')+'][NO REPLY]')
+                    #ERROR Remove Speech File and reset reply_file
+                    #os.remove(os.path.join(comment_path, speech_filename))
+                    reply_file = -1
+
+                    ##r = requests.post(url, headers=headers, data = {'message': 'ไม่มีคำตอบสำหรับ ' + speech})
+
+                #print('['+time.strftime('%H:%M')+'][Loop] resume ' + clips[i])
+                #pygame.mixer.Channel(0).unpause()
+
+                time.sleep(1)
+                #os.remove(os.path.join(comment_path, speech_filename))
+
         time.sleep(2)
 
     # play next clip
