@@ -649,10 +649,14 @@ while(True):
                         
                         while pygame.mixer.Channel(1).get_busy():
                             time.sleep(1)
-                        reply_file = -1
                     else:
                         print('['+time.strftime('%H:%M')+'][NO REPLY]')
-                        r = requests.post(url, headers=headers, data = {'message': 'ไม่มีคำตอบสำหรับ ' + speech})
+
+                        #ERROR Remove Speech File and reset reply_file
+                        os.remove(os.path.join(comment_path, speech_filename))
+                        reply_file = -1
+
+                        ##r = requests.post(url, headers=headers, data = {'message': 'ไม่มีคำตอบสำหรับ ' + speech})
   
                     #print('['+time.strftime('%H:%M')+'][Loop] resume ' + clips[i])
                     #pygame.mixer.Channel(0).unpause()
@@ -666,7 +670,7 @@ while(True):
                     try:
                         if reply_file != -1:
                             print("[ERROR] FileNotFoundError:", os.path.join(reply_path, reply_file))
-                            r = requests.post(url, headers=headers, data = {'message': 'Error: ตรวจสอบว่ามีไฟล์คำตอบจริงไหม ' + reply_file + ' จากคำถาม ' + speech})
+                            ##r = requests.post(url, headers=headers, data = {'message': 'Error: ตรวจสอบว่ามีไฟล์คำตอบจริงไหม ' + reply_file + ' จากคำถาม ' + speech})
 
                             if os.path.exists(os.path.join(comment_path, speech_filename)):
                                 os.remove(os.path.join(comment_path, speech_filename))
