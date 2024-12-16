@@ -23,7 +23,6 @@ load_dotenv()
 TOKEN = json.loads(os.getenv('TOKEN', 'True').replace('\n', '').replace('\\',''))
 #UIDS = json.loads(os.getenv('UIDS', 'True').replace('\n', '').replace('\\',''))
 ACCOUNTS = json.loads(os.getenv('ACCOUNTS', 'True').replace('\n', '').replace('\\','').replace(' ',''))
-HEADLESS = os.getenv('HEADLESS', 'False')
 USER_PROFILE = os.getenv('USER_PROFILE', 'True')
 LINE_NOTIFY_URL = os.getenv('LINE_NOTIFY_URL')
 
@@ -52,8 +51,6 @@ options.add_argument("--window-size=1280,720")
 
 if HEADLESS:
     options.add_argument("--headless=new")
-    print('['+time.strftime('%H:%M')+'][CONFIG] HEADLESS Enabled')
-
 ######################
 # Attempt to disable error stun.l.google.com message
 #options.add_argument(r'--disable-logging')
@@ -100,20 +97,14 @@ def siri(unique_id, user, comment):
     if len(comment) > 0 and comment[0] == "@" and len(comment.split()) > 1:
         comment = comment.split()[1:]
         comment = ' '.join(comment)
-    #
     tts = gTTS(comment, lang='th')
     filename = str(int(time.time())) + '_' + comment
     comment_path = 'comment'
     if not os.path.exists(comment_path):
         os.makedirs(comment_path)
     tts.save(os.path.join(comment_path, filename +'.ogg'))
-    #
     #    print('['+time.strftime('%H:%M')+']['+uid+'][Error] gtts')
     #    lives[uid]['shown_connection_error'] = True
-
-##############################
-#   Initial
-##############################
 
 account_count = 0
 for account in ACCOUNTS:
@@ -144,54 +135,4 @@ for account in ACCOUNTS:
     account_count = account_count + 1
     #
     time.sleep(1)
-    
-#####################################################
-# To debug, run python prompt and copy until here
-#####################################################
 
-##################################
-#   Main Loop
-##################################
-
-while True:
-    for account in ACCOUNTS:
-        platform = account["platform"]
-        uid = account["uid"]
-        #
-        if(len(ACCOUNTS) > 1):
-            switch(uid)
-        #
-        try:
-            if platform == 'tiktok':
-                chat_count = tiktok.get_chat_count(browser)
-            elif platform == 'shopee':
-                chat_count = shopee.get_chat_count(browser)
-            #
-            lives[uid]['chat_count'] = chat_count
-            #print("Count:", chat_count)
-            #
-            if(lives[uid]['chat_count'] > lives[uid]['chat_processed_index']):
-                user = ''
-                comment = ''
-                if platform == 'tiktok':
-                    (user, comment) = tiktok.get_chat(browser, lives[uid]['chat_processed_index'])
-                elif platform == 'shopee':
-                    (user, comment) = shopee.get_chat(browser, lives[uid]['chat_processed_index'])
-                print('['+time.strftime('%H:%M')+']['+platform+']['+uid+']['+user+"] " + comment)
-                #
-                if(comment != ''):
-                    siri(uid, user, comment)
-                lives[uid]['chat_processed_index'] = lives[uid]['chat_processed_index'] + 1
-                #print("Last Index :" , last_index)
-            #   
-            #if len(temp_comments):
-            #    print("[Chat] Found", len(temp_comments), "chat(s)" )
-            #
-        except:
-            # ERROR remove from the list
-            if(lives[uid]['shown_connection_error'] == False):
-                print('['+time.strftime('%H:%M')+']['+uid+'] ERROR')
-                lives[uid]['shown_connection_error'] = True
-            reconnect(uid)
-        #
-        time.sleep(1)

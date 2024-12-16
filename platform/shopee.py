@@ -70,6 +70,7 @@ def initialize(browser):
         except:
             print("Trying to Get Live Session Error")
             time.sleep(5)
+    clean_up(browser)
 
 #####################
 # Removing Element
