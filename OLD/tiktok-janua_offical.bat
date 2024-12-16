@@ -1,1 +1,0 @@
-python tiktok-janua_official.py

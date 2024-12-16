@@ -1,1 +1,0 @@
-python tiktok-prw.xx.py
