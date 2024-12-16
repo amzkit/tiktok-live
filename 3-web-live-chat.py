@@ -5,7 +5,6 @@ import datetime
 import sys
 sys.path.append('platform')
 
-HEADLESS = False
 AUTO_COMMENT = False
 
 #GTTS Speech
@@ -44,13 +43,14 @@ options = webdriver.ChromeOptions()
 if 'USER_PROFILE' in locals():
     options.add_argument("--user-data-dir="+str(USER_PROFILE)) #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
 else:
-    options.add_argument("--user-data-dir=C:\\Users\\Decoz\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 2")
+    options.add_argument("--user-data-dir=C:\\Users\\Decoz\\AppData\\Local\\Google\\Chrome\\User Data\\Default")
+#options.add_argument("--profile-directory=Default")
 options.add_argument(r'--remote-debugging-pipe')
 options.add_argument("--log-level=3")
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_argument("--window-size=1280,720")
 
-if HEADLESS:
+if HEADLESS == True:
     options.add_argument("--headless=new")
     print('['+time.strftime('%H:%M')+'][CONFIG] HEADLESS Enabled')
 
@@ -144,7 +144,7 @@ for account in ACCOUNTS:
     account_count = account_count + 1
     #
     time.sleep(1)
-    
+
 #####################################################
 # To debug, run python prompt and copy until here
 #####################################################

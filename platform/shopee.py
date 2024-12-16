@@ -57,8 +57,8 @@ def initialize(browser):
     while True:
         try:
             browser.get('https://seller.shopee.co.th/creator-center/insight/live/list#')
-            load_cookies(browser)
-            browser.get('https://seller.shopee.co.th/creator-center/insight/live/list#')
+            #load_cookies(browser)
+            #browser.get('https://seller.shopee.co.th/creator-center/insight/live/list#')
             live_session_xpath = "//tr[@class='eds-react-table-row eds-react-table-row-level-0']"
             live_session = WebDriverWait(browser, 180).until(ExpectedConditions.presence_of_element_located((By.XPATH, live_session_xpath)))
             real_time = live_session.find_elements(By.XPATH, '//div[contains(text(), "Real-Time")]')

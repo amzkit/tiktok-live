@@ -57,7 +57,7 @@ content_editable = "//div[@contenteditable='plaintext-only']"
 
 def initialize(browser, uid):
     browser.get('https://tiktok.com/@'+uid+'/live')
-    load_cookies(browser)
+    #load_cookies(browser)
     clean_up(browser)
 
 def clean_up(browser):
