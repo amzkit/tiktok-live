@@ -118,10 +118,8 @@ for account in ACCOUNTS:
     #
     if platform == "shopee":
         shopee.initialize(browser)
-        shopee.clean_up(browser)
     if platform == "tiktok":
         tiktok.initialize(browser, uid)
-        tiktok.clean_up(browser)
     #
     print('['+time.strftime('%H:%M')+']['+platform+']['+uid+'] Connected')
     #

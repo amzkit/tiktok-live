@@ -1,2 +1,4 @@
 /OLD
 .env
+./platform/shopee_cookie.pkl
+./platform/tiktok_cookie.pkl
