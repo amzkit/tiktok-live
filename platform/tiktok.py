@@ -28,7 +28,7 @@ def load_cookies(browser):
         print('['+time.strftime('%H:%M')+'][Tiktok] Cookies Loaded')
 
 # To remove
-div_side_nav_container = "//div[contains(@class, 'DivSideNavContainer')]"
+div_side_nav_container = "//div[contains(@class, 'css-eug0zz')]"
 div_live_content = "//div[contains(@class, 'DivLiveContent')]"
 
 removingElements = [
@@ -61,10 +61,18 @@ def initialize(browser, uid):
     clean_up(browser)
 
 def clean_up(browser):
-    DivSideNavContainer = WebDriverWait(browser, 60).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_side_nav_container)))
-    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", DivSideNavContainer)
-    DivLiveContent = browser.find_elements(By.XPATH, div_live_content)
-    browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", DivLiveContent[1])
+    #Removing left menu
+    try:
+        DivSideNavContainer = WebDriverWait(browser, 60).until(ExpectedConditions.presence_of_element_located((By.XPATH, div_side_nav_container)))
+        browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", DivSideNavContainer)
+    except:
+        print('['+time.strftime('%H:%M')+'][Tiktok][ERROR] Cannot remove side nav bar container (the left menu)')
+    #Removing live stream content
+    try:
+        DivLiveContent = browser.find_elements(By.XPATH, div_live_content)
+        browser.execute_script("""var element = arguments[0];element.parentNode.removeChild(element);""", DivLiveContent[1])
+    except:
+        print('['+time.strftime('%H:%M')+'][Tiktok][ERROR] Cannot remove live stream content')
 
 #######################################
 #   Chat
